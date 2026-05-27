@@ -1,22 +1,21 @@
 async function doar(){
 
-try{
-
 const valor=
 Number(
 document
 .getElementById(
 "valor"
-).value
+)
+.value
 );
-
-alert("Criando pagamento");
 
 const r=
 await fetch(
 "/api/pagar",
 {
-method:"POST",
+
+method:
+"POST",
 
 headers:{
 "Content-Type":
@@ -25,29 +24,48 @@ headers:{
 
 body:
 JSON.stringify({
+
 valor
+
 })
 
 }
+
 );
 
 const data=
 await r.json();
 
-alert(
-JSON.stringify(data)
-);
+document
+.getElementById(
+"msg"
+)
+.innerHTML=
+`
+<img
+style="
+width:220px;
+"
+src="
+data:image/png;base64,
+${data.qr}
+">
 
-window.location=
-data.url;
+<br><br>
 
-}
-catch(e){
+PIX:
 
-alert(
-e.message
-);
+<br>
 
-}
+<textarea
+style="
+width:100%;
+height:80px;
+">
+
+${data.pix}
+
+</textarea>
+`;
 
 }
