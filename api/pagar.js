@@ -12,7 +12,7 @@ return res
 .json({
 
 erro:
-"Método inválido"
+"Metodo invalido"
 
 });
 
@@ -24,10 +24,10 @@ const {
 valor
 }=req.body;
 
-const r =
+const resposta =
 await fetch(
 
-"https://app.sigilopay.com.br/api/v1",
+`${process.env.SIGILO_URL}/payment`,
 
 {
 
@@ -37,34 +37,21 @@ method:
 headers:{
 
 Authorization:
-`Bearer ${process.env.MP_TOKEN}`,
+process.env.SIGILO_KEY,
 
 "Content-Type":
-"application/json",
-
-"X-Idempotency-Key":
-crypto.randomUUID()
+"application/json"
 
 },
 
 body:
 JSON.stringify({
 
-transaction_amount:
+amount:
 Number(valor),
 
-payment_method_id:
-"pix",
-
-description:
-"Vaquinha",
-
-payer:{
-
-email:
-"teste@email.com"
-
-}
+method:
+"pix"
 
 })
 
@@ -73,33 +60,15 @@ email:
 );
 
 const data =
-await r.json();
+await resposta.json();
 
-return res
-.status(
-r.status
-)
-.json({
+return res.json({
 
 pix:
-
-data
-?.point_of_interaction
-?.transaction_data
-?.qr_code,
+data.pix,
 
 qr:
-
-data
-?.point_of_interaction
-?.transaction_data
-?.qr_code_base64,
-
-erro:
-
-r.ok
-?null
-:data
+data.qr
 
 });
 
