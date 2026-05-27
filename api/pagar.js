@@ -1,3 +1,16 @@
+function parseBrl(valor){
+
+return Number(
+
+valor
+.replace(/\./g,"")
+.replace(",",".")
+.replace(/[^\d.]/g,"")
+
+);
+
+}
+
 export default async function handler(
 req,
 res
@@ -20,9 +33,10 @@ erro:
 
 try{
 
-const {
-valor
-}=req.body;
+const valor =
+parseBrl(
+req.body.valor
+);
 
 const resposta =
 await fetch(
@@ -31,8 +45,7 @@ await fetch(
 
 {
 
-method:
-"POST",
+method:"POST",
 
 headers:{
 
@@ -51,15 +64,15 @@ body:
 JSON.stringify({
 
 identifier:
-"pix_"+Date.now(),
+"vak_"+Date.now(),
 
 amount:
-Number(valor),
+valor,
 
 client:{
 
 name:
-"Cliente",
+"Contribuinte",
 
 email:
 "cliente@email.com",
@@ -89,10 +102,7 @@ data
 ?.code,
 
 qr:
-`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(data?.pix?.code||"")}`,
-
-raw:
-data
+`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(data?.pix?.code||"")}`
 
 });
 
