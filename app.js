@@ -1,50 +1,14 @@
-let meta = 5000;
-
-let arrecadado =
-Number(
-localStorage.getItem(
-"valor"
-)
-) || 0;
-
-function atualizar(){
-
-let porcentagem =
-(arrecadado/meta)*100;
-
-document
-.getElementById(
-"bar"
-)
-.style.width =
-porcentagem+"%";
-
-document
-.getElementById(
-"info"
-)
-.innerHTML =
-`R$ ${arrecadado} / R$ ${meta}`;
-
-}
-
-async function doar(){
-
-try{
+async function contribuir(){
 
 const valor =
-Number(
 document
 .getElementById(
 "valor"
 )
-.value
-);
+.value;
 
 if(
 !valor
-||
-valor<=0
 ){
 
 alert(
@@ -55,7 +19,21 @@ return;
 
 }
 
-const r =
+const botao =
+document
+.getElementById(
+"btn"
+);
+
+botao.disabled =
+true;
+
+botao.innerText =
+"Gerando PIX...";
+
+try{
+
+const resposta =
 await fetch(
 "/api/pagar",
 {
@@ -64,8 +42,10 @@ method:
 "POST",
 
 headers:{
+
 "Content-Type":
 "application/json"
+
 },
 
 body:
@@ -80,19 +60,23 @@ valor
 );
 
 const data =
-await r.json();
+await resposta.json();
 
 if(
-!data.qr
+data.erro
 ){
 
 alert(
 JSON.stringify(
-data,
-null,
-2
+data.erro
 )
 );
+
+botao.disabled =
+false;
+
+botao.innerText =
+"Contribuir ❤️";
 
 return;
 
@@ -100,7 +84,7 @@ return;
 
 document
 .getElementById(
-"msg"
+"resultado"
 )
 .innerHTML =
 
@@ -108,32 +92,24 @@ document
 
 <h2>
 
-PIX:
+Pague via PIX
 
 </h2>
 
 <img
-
 src="data:image/png;base64,${data.qr}"
-
 style="
-
 width:220px;
-
 border-radius:20px;
-
 ">
 
 <br><br>
 
 <textarea
-
+readonly
 style="
-
 width:100%;
-
-height:90px;
-
+height:120px;
 ">
 
 ${data.pix}
@@ -151,6 +127,10 @@ e.message
 
 }
 
-}
+botao.disabled =
+false;
 
-atualizar();
+botao.innerText =
+"Contribuir ❤️";
+
+}
