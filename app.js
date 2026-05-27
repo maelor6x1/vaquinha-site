@@ -7,8 +7,16 @@ document
 )
 .value;
 
+const msg =
+document
+.getElementById(
+"msg"
+);
+
 if(
 !valor
+||
+Number(valor)<=0
 ){
 
 alert(
@@ -18,12 +26,6 @@ alert(
 return;
 
 }
-
-const msg =
-document
-.getElementById(
-"msg"
-);
 
 msg.innerHTML =
 "Gerando PIX...";
@@ -39,10 +41,8 @@ method:
 "POST",
 
 headers:{
-
 "Content-Type":
 "application/json"
-
 },
 
 body:
@@ -59,9 +59,39 @@ valor
 const data =
 await r.json();
 
+if(
+data.erro
+){
+
 msg.innerHTML =
 
 `
+
+<pre>
+
+${JSON.stringify(
+data,
+null,
+2
+)}
+
+</pre>
+
+`;
+
+return;
+
+}
+
+msg.innerHTML =
+
+`
+
+<h2>
+
+PIX Gerado
+
+</h2>
 
 <img
 
@@ -69,6 +99,7 @@ src="${data.qr}"
 
 style="
 width:220px;
+border-radius:16px;
 "
 
 >
@@ -79,8 +110,12 @@ width:220px;
 
 style="
 width:100%;
-height:90px;
-">
+height:120px;
+"
+
+readonly
+
+>
 
 ${data.pix}
 
