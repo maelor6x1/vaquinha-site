@@ -17,9 +17,9 @@ const {
 valor
 }=req.body;
 
-const resposta=
+const r=
 await fetch(
-"https://api.mercadopago.com/checkout/preferences",
+"https://api.mercadopago.com/v1/payments",
 {
 
 method:"POST",
@@ -37,43 +37,21 @@ Authorization:
 body:
 JSON.stringify({
 
-items:[
+transaction_amount:
+Number(valor),
 
-{
+description:
+"Contribuição",
 
-title:
-"Contribuição Vaquinha",
+payment_method_id:
+"pix",
 
-quantity:
-1,
+payer:{
 
-currency_id:
-"BRL",
-
-unit_price:
-Number(valor)
+email:
+"comprador@email.com"
 
 }
-
-],
-
-payment_methods:{
-
-excluded_payment_types:[],
-
-installments:1
-
-},
-
-back_urls:{
-
-success:
-`${req.headers.origin}/obrigado.html`
-
-},
-
-auto_return:
-"approved"
 
 })
 
@@ -82,12 +60,21 @@ auto_return:
 );
 
 const data=
-await resposta.json();
+await r.json();
 
 res.json({
 
-url:
-data.init_point
+pix:
+data
+?.point_of_interaction
+?.transaction_data
+?.qr_code,
+
+qr:
+data
+?.point_of_interaction
+?.transaction_data
+?.qr_code_base64
 
 });
 
