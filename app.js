@@ -9,12 +9,10 @@ document
 
 if(
 !valor
-||
-Number(valor)<=0
 ){
 
 alert(
-"Digite um valor válido"
+"Digite um valor"
 );
 
 return;
@@ -32,7 +30,7 @@ msg.innerHTML =
 
 try{
 
-const resposta =
+const r =
 await fetch(
 "/api/pagar",
 {
@@ -59,33 +57,16 @@ valor
 );
 
 const data =
-await resposta.json();
+await r.json();
 
 if(
 data.erro
 ){
 
 msg.innerHTML =
-
-`
-
-<p>
-
-Erro:
-
-</p>
-
-<pre>
-
-${JSON.stringify(
-data.erro,
-null,
-2
-)}
-
-</pre>
-
-`;
+JSON.stringify(
+data.erro
+);
 
 return;
 
@@ -95,35 +76,19 @@ msg.innerHTML =
 
 `
 
-<h2>
-
-PIX:
-
-</h2>
-
 <img
-
-src="data:image/png;base64,${data.qr}"
-
+src="${data.qr}"
 style="
-width:230px;
-border-radius:16px;
-"
-
->
+width:220px;
+">
 
 <br><br>
 
 <textarea
-
 style="
 width:100%;
-height:110px;
-"
-
-readonly
-
->
+height:100px;
+">
 
 ${data.pix}
 
