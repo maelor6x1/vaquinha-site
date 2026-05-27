@@ -7,6 +7,18 @@ document
 )
 .value;
 
+if(
+!valor
+){
+
+alert(
+"Digite um valor"
+);
+
+return;
+
+}
+
 const msg =
 document
 .getElementById(
@@ -14,7 +26,7 @@ document
 );
 
 msg.innerHTML =
-"Consultando API...";
+"Gerando PIX...";
 
 try{
 
@@ -27,8 +39,10 @@ method:
 "POST",
 
 headers:{
+
 "Content-Type":
 "application/json"
+
 },
 
 body:
@@ -49,19 +63,28 @@ msg.innerHTML =
 
 `
 
-<pre
+<img
+
+src="${data.qr}"
+
 style="
-text-align:left;
-white-space:pre-wrap;
+width:220px;
+"
+
+>
+
+<br><br>
+
+<textarea
+
+style="
+width:100%;
+height:90px;
 ">
 
-${JSON.stringify(
-data,
-null,
-2
-)}
+${data.pix}
 
-</pre>
+</textarea>
 
 `;
 
