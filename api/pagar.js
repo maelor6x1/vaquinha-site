@@ -3,21 +3,6 @@ req,
 res
 ){
 
-if(
-req.method!=="POST"
-){
-
-return res
-.status(405)
-.json({
-
-erro:
-"Metodo invalido"
-
-});
-
-}
-
 try{
 
 const {
@@ -27,7 +12,7 @@ valor
 const resposta =
 await fetch(
 
-`${process.env.SIGILO_URL}/payment`,
+process.env.SIGILO_URL,
 
 {
 
@@ -48,10 +33,7 @@ body:
 JSON.stringify({
 
 amount:
-Number(valor),
-
-method:
-"pix"
+Number(valor)
 
 })
 
@@ -59,16 +41,13 @@ method:
 
 );
 
-const data =
-await resposta.json();
+const texto =
+await resposta.text();
 
 return res.json({
 
-pix:
-data.pix,
-
-qr:
-data.qr
+resposta:
+texto
 
 });
 
