@@ -1,12 +1,13 @@
 async function doar(){
 
+try{
+
 const valor=
 Number(
 document
 .getElementById(
 "valor"
-)
-.value
+).value
 );
 
 const r=
@@ -14,8 +15,7 @@ await fetch(
 "/api/pagar",
 {
 
-method:
-"POST",
+method:"POST",
 
 headers:{
 "Content-Type":
@@ -36,6 +36,42 @@ valor
 const data=
 await r.json();
 
+alert(
+JSON.stringify(
+data,
+null,
+2
+)
+);
+
+if(
+!data.qr
+){
+
+document
+.getElementById(
+"msg"
+)
+.innerHTML=
+`
+Erro:
+<br><br>
+
+<pre>
+
+${JSON.stringify(
+data,
+null,
+2
+)}
+
+</pre>
+`;
+
+return;
+
+}
+
 document
 .getElementById(
 "msg"
@@ -43,29 +79,27 @@ document
 .innerHTML=
 `
 <img
+src="data:image/png;base64,${data.qr}"
 style="
 width:220px;
-"
-src="
-data:image/png;base64,
-${data.qr}
 ">
 
 <br><br>
 
-PIX:
-
-<br>
-
-<textarea
-style="
-width:100%;
-height:80px;
-">
+<textarea>
 
 ${data.pix}
 
 </textarea>
 `;
+
+}
+catch(e){
+
+alert(
+e.message
+);
+
+}
 
 }
