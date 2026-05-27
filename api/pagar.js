@@ -27,7 +27,7 @@ valor
 const r =
 await fetch(
 
-"https://api.mercadopago.com/v1/payments",
+"https://app.sigilopay.com.br/api/v1",
 
 {
 
