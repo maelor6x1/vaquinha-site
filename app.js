@@ -27,7 +27,7 @@ return;
 
 const r=
 await fetch(
-"pagar",
+"pagar.js",
 {
 
 method:
