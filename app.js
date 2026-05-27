@@ -1,4 +1,4 @@
-let meta=5000;
+let meta=50000;
 
 let arrecadado=0;
 
