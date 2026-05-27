@@ -1,51 +1,19 @@
-let meta=50000;
+async function doar(){
 
-let arrecadado=0;
-
-function atualizar(){
-
-let porcentagem=
-(arrecadado/meta)*100;
-
-document
-.getElementById(
-"bar"
-)
-.style.width=
-porcentagem+"%";
-
-document
-.getElementById(
-"info"
-)
-.innerHTML=
-`R$ ${
-arrecadado
-}
- / R$ ${
-meta
-}`;
-
-localStorage
-.setItem(
-"valor",
-arrecadado
-);
-
-}
-
-function doar(){
-
-let valor=
+const valor=
 Number(
+
 document
 .getElementById(
 "valor"
 )
 .value
+
 );
 
 if(
+!valor
+||
 valor<=0
 ){
 
@@ -57,31 +25,36 @@ return;
 
 }
 
-arrecadado+=valor;
+const r=
+await fetch(
+"/pagar",
+{
 
-atualizar();
+method:
+"POST",
 
-document
-.getElementById(
-"msg"
-)
-.innerHTML=
-"❤️ Obrigado pela contribuição";
+headers:{
 
-document
-.getElementById(
-"valor"
-)
-.value="";
+"Content-Type":
+"application/json"
+
+},
+
+body:
+JSON.stringify({
+
+valor
+
+})
 
 }
 
-arrecadado=
-Number(
-localStorage
-.getItem(
-"valor"
-)
-)||0;
+);
 
-atualizar();
+const data=
+await r.json();
+
+window.location=
+data.url;
+
+}
