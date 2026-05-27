@@ -1,7 +1,4 @@
-export default async function handler(
-req,
-res
-){
+export default async function handler(req,res){
 
 if(
 req.method!=="POST"
@@ -52,8 +49,7 @@ Number(valor),
 description:
 "Vaquinha",
 
-payment_method_id:
-"pix",
+payment_method_id:"pix",
 
 payer:{
 
