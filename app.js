@@ -1,4 +1,4 @@
-async function contribuir(){
+async function doar(){
 
 const valor =
 document
