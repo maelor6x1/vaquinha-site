@@ -9,17 +9,23 @@ req.method!=="POST"
 
 return res
 .status(405)
-.end();
+.json({
+erro:"Método inválido"
+});
 
 }
+
+try{
 
 const {
 valor
 }=req.body;
 
-const r=
+const resposta=
 await fetch(
+
 "https://api.mercadopago.com/v1/payments",
+
 {
 
 method:"POST",
@@ -30,7 +36,10 @@ Authorization:
 `Bearer ${process.env.MP_TOKEN}`,
 
 "Content-Type":
-"application/json"
+"application/json",
+
+"X-Idempotency-Key":
+crypto.randomUUID()
 
 },
 
@@ -41,7 +50,7 @@ transaction_amount:
 Number(valor),
 
 description:
-"Contribuição",
+"Vaquinha",
 
 payment_method_id:
 "pix",
@@ -49,7 +58,7 @@ payment_method_id:
 payer:{
 
 email:
-"comprador@email.com"
+"teste@teste.com"
 
 }
 
@@ -60,7 +69,7 @@ email:
 );
 
 const data=
-await r.json();
+await resposta.json();
 
 res.json({
 
@@ -74,8 +83,25 @@ qr:
 data
 ?.point_of_interaction
 ?.transaction_data
-?.qr_code_base64
+?.qr_code_base64,
+
+erro:
+data
 
 });
+
+}
+catch(e){
+
+res
+.status(500)
+.json({
+
+erro:
+e.message
+
+});
+
+}
 
 }
