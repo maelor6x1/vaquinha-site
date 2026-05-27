@@ -12,7 +12,7 @@ return res
 .json({
 
 erro:
-"Método inválido"
+"Metodo invalido"
 
 });
 
@@ -27,7 +27,7 @@ valor
 const resposta =
 await fetch(
 
-process.env.SIGILO_URL,
+"https://app.sigilopay.com.br/api/v1/gateway/pix/receive",
 
 {
 
@@ -36,19 +36,41 @@ method:
 
 headers:{
 
-Authorization:
-process.env.SIGILO_KEY,
-
 "Content-Type":
-"application/json"
+"application/json",
+
+"x-public-key":
+process.env.SIGILO_PUBLIC,
+
+"x-secret-key":
+process.env.SIGILO_SECRET
 
 },
 
 body:
 JSON.stringify({
 
+identifier:
+"pix_"+Date.now(),
+
 amount:
-Number(valor)
+Number(valor),
+
+client:{
+
+name:
+"Cliente",
+
+email:
+"cliente@email.com",
+
+phone:
+"11999999999",
+
+document:
+"12345678900"
+
+}
 
 })
 
@@ -59,12 +81,25 @@ Number(valor)
 const data =
 await resposta.json();
 
-res.json(data);
+return res.json({
+
+pix:
+data
+?.pix
+?.code,
+
+qr:
+`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(data?.pix?.code||"")}`,
+
+raw:
+data
+
+});
 
 }
 catch(e){
 
-res
+return res
 .status(500)
 .json({
 
