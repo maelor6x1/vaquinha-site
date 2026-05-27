@@ -1,50 +1,101 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width">
 
-<title>Vaquinha</title>
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+/>
 
-<link rel="stylesheet" href="style.css">
+<title>
+Vaquinha Online
+</title>
+
+<link
+rel="stylesheet"
+href="style.css"
+/>
 
 </head>
 
 <body>
 
-<div class="card">
+<div class="container">
 
-<h1>🎯 Minha Vaquinha</h1>
+<div class="top">
 
-<p class="desc">
-Ajude a alcançar nossa meta
+<h1>
+🎯 Vaquinha Online
+</h1>
+
+<p class="subtitle">
+Ajude a alcançar nossa meta ❤️
 </p>
+
+</div>
+
+<div class="metaCard">
+
+<div class="metaInfo">
+
+<span>
+Meta
+</span>
+
+<h2>
+R$ 5.000
+</h2>
+
+</div>
 
 <div class="progress">
 
 <div
 class="bar"
-id="bar">
-</div>
+id="bar"
+></div>
 
 </div>
 
-<p id="info">
-R$ 0 / R$ 5.000
+<p id="valorMeta">
+R$ 0 arrecadados
 </p>
+
+</div>
+
+<div class="card">
+
+<label>
+Quanto deseja contribuir?
+</label>
+
+<div class="inputBox">
+
+<span>
+R$
+</span>
 
 <input
 id="valor"
-type="number"
-placeholder="Escolha o valor"
+type="text"
+placeholder="0,00"
 />
 
-<button onclick="doar()">
+</div>
+
+<button
+onclick="doar()"
+id="btn"
+>
 Contribuir ❤️
 </button>
 
-<p id="msg"></p>
+<div id="resultado"></div>
+
+</div>
 
 </div>
 
