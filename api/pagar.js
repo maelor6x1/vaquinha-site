@@ -12,19 +12,21 @@ valor
 const resposta =
 await fetch(
 
-process.env.SIGILO_URL,
+"https://app.sigilopay.com.br/api/v1",
 
 {
 
-method:
-"POST",
+method:"POST",
 
 headers:{
 
 Authorization:
-process.env.SIGILO_KEY,
+`Bearer ${process.env.SIGILO_KEY}`,
 
 "Content-Type":
+"application/json",
+
+Accept:
 "application/json"
 
 },
@@ -33,7 +35,10 @@ body:
 JSON.stringify({
 
 amount:
-Number(valor)
+Number(valor),
+
+type:
+"pix"
 
 })
 
@@ -45,6 +50,9 @@ const texto =
 await resposta.text();
 
 return res.json({
+
+status:
+resposta.status,
 
 resposta:
 texto
