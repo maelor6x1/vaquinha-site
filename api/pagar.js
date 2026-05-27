@@ -1,28 +1,18 @@
-export default async function handler(req,res){
+export default async function handler(req, res) {
 
-if(
-req.method!=="POST"
-){
-
-return res
-.status(405)
-.json({
+if (req.method !== "POST") {
+return res.status(405).json({
 erro:"Método inválido"
 });
-
 }
 
-try{
+try {
 
-const {
-valor
-}=req.body;
+const { valor } = req.body;
 
-const resposta=
+const resposta =
 await fetch(
-
 "https://api.mercadopago.com/v1/payments",
-
 {
 
 method:"POST",
@@ -47,15 +37,14 @@ transaction_amount:
 Number(valor),
 
 description:
-"Vaquinha",
+"Contribuição Vaquinha",
 
-payment_method_id:"pix",
+payment_method_id:
+"pix",
 
 payer:{
-
 email:
-"teste@teste.com"
-
+"comprador@email.com"
 }
 
 })
@@ -64,7 +53,7 @@ email:
 
 );
 
-const data=
+const data =
 await resposta.json();
 
 res.json({
