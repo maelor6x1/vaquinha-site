@@ -1,60 +1,53 @@
 async function doar(){
 
+try{
+
 const valor=
 Number(
-
 document
 .getElementById(
 "valor"
-)
-.value
-
+).value
 );
 
-if(
-!valor
-||
-valor<=0
-){
-
-alert(
-"Digite um valor"
-);
-
-return;
-
-}
+alert("Criando pagamento");
 
 const r=
 await fetch(
-"pagar.js",
+"/api/pagar",
 {
-
-method:
-"POST",
+method:"POST",
 
 headers:{
-
 "Content-Type":
 "application/json"
-
 },
 
 body:
 JSON.stringify({
-
 valor
-
 })
 
 }
-
 );
 
 const data=
 await r.json();
 
+alert(
+JSON.stringify(data)
+);
+
 window.location=
 data.url;
+
+}
+catch(e){
+
+alert(
+e.message
+);
+
+}
 
 }
