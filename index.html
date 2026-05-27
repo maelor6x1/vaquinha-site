@@ -1,27 +1,55 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 <meta charset="UTF-8">
-<title>Minha Vaquinha</title>
+<meta name="viewport" content="width=device-width">
+
+<title>Vaquinha</title>
+
 <link rel="stylesheet" href="style.css">
+
 </head>
 
 <body>
-<h1>Minha Vaquinha</h1>
+
+<div class="card">
+
+<h1>🎯 Minha Vaquinha</h1>
+
+<p class="desc">
+Ajude a alcançar nossa meta
+</p>
 
 <div class="progress">
-<div id="bar"></div>
+
+<div
+class="bar"
+id="bar">
 </div>
 
-<p id="info"></p>
+</div>
 
-<input id="valor" type="number" placeholder="Digite valor">
+<p id="info">
+R$ 0 / R$ 5.000
+</p>
+
+<input
+id="valor"
+type="number"
+placeholder="Escolha o valor"
+/>
 
 <button onclick="doar()">
-Doar
+Contribuir ❤️
 </button>
+
+<p id="msg"></p>
+
+</div>
 
 <script src="app.js"></script>
 
 </body>
+
 </html>
