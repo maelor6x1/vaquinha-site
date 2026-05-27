@@ -3,6 +3,21 @@ req,
 res
 ){
 
+if(
+req.method!=="POST"
+){
+
+return res
+.status(405)
+.json({
+
+erro:
+"Método inválido"
+
+});
+
+}
+
 try{
 
 const {
@@ -12,21 +27,19 @@ valor
 const resposta =
 await fetch(
 
-"https://app.sigilopay.com.br/api/v1",
+process.env.SIGILO_URL,
 
 {
 
-method:"POST",
+method:
+"POST",
 
 headers:{
 
 Authorization:
-`Bearer ${process.env.SIGILO_KEY}`,
+process.env.SIGILO_KEY,
 
 "Content-Type":
-"application/json",
-
-Accept:
 "application/json"
 
 },
@@ -35,10 +48,7 @@ body:
 JSON.stringify({
 
 amount:
-Number(valor),
-
-type:
-"pix"
+Number(valor)
 
 })
 
@@ -46,23 +56,15 @@ type:
 
 );
 
-const texto =
-await resposta.text();
+const data =
+await resposta.json();
 
-return res.json({
-
-status:
-resposta.status,
-
-resposta:
-texto
-
-});
+res.json(data);
 
 }
 catch(e){
 
-return res
+res
 .status(500)
 .json({
 
