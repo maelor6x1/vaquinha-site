@@ -9,26 +9,25 @@ document
 
 if(
 !valor
+||
+Number(valor)<=0
 ){
 
 alert(
-"Digite um valor"
+"Digite um valor válido"
 );
 
 return;
 
 }
 
-const botao =
+const msg =
 document
 .getElementById(
-"btn"
+"msg"
 );
 
-botao.disabled =
-true;
-
-botao.innerText =
+msg.innerHTML =
 "Gerando PIX...";
 
 try{
@@ -66,51 +65,65 @@ if(
 data.erro
 ){
 
-alert(
-JSON.stringify(
-data.erro
-)
-);
+msg.innerHTML =
 
-botao.disabled =
-false;
+`
 
-botao.innerText =
-"Contribuir ❤️";
+<p>
+
+Erro:
+
+</p>
+
+<pre>
+
+${JSON.stringify(
+data.erro,
+null,
+2
+)}
+
+</pre>
+
+`;
 
 return;
 
 }
 
-document
-.getElementById(
-"resultado"
-)
-.innerHTML =
+msg.innerHTML =
 
 `
 
 <h2>
 
-Pague via PIX
+PIX:
 
 </h2>
 
 <img
+
 src="data:image/png;base64,${data.qr}"
+
 style="
-width:220px;
-border-radius:20px;
-">
+width:230px;
+border-radius:16px;
+"
+
+>
 
 <br><br>
 
 <textarea
-readonly
+
 style="
 width:100%;
-height:120px;
-">
+height:110px;
+"
+
+readonly
+
+>
 
 ${data.pix}
 
@@ -121,16 +134,9 @@ ${data.pix}
 }
 catch(e){
 
-alert(
-e.message
-);
+msg.innerHTML =
+e.message;
 
 }
-
-botao.disabled =
-false;
-
-botao.innerText =
-"Contribuir ❤️";
 
 }
