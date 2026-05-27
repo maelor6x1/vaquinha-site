@@ -1,18 +1,36 @@
 let meta=5000;
-let arrecadado=500;
+
+let arrecadado=0;
 
 function atualizar(){
 
-let p=(arrecadado/meta)*100;
+let porcentagem=
+(arrecadado/meta)*100;
 
-document.getElementById(
+document
+.getElementById(
 "bar"
-).style.width=p+"%";
+)
+.style.width=
+porcentagem+"%";
 
-document.getElementById(
+document
+.getElementById(
 "info"
-).innerText=
-`R$ ${arrecadado} de R$ ${meta}`;
+)
+.innerHTML=
+`R$ ${
+arrecadado
+}
+ / R$ ${
+meta
+}`;
+
+localStorage
+.setItem(
+"valor",
+arrecadado
+);
 
 }
 
@@ -20,21 +38,50 @@ function doar(){
 
 let valor=
 Number(
-document.getElementById(
+document
+.getElementById(
 "valor"
-).value
+)
+.value
 );
 
-if(!valor)return;
+if(
+valor<=0
+){
+
+alert(
+"Digite um valor"
+);
+
+return;
+
+}
 
 arrecadado+=valor;
 
 atualizar();
 
-alert(
-"Obrigado pela contribuição ❤️"
-);
+document
+.getElementById(
+"msg"
+)
+.innerHTML=
+"❤️ Obrigado pela contribuição";
+
+document
+.getElementById(
+"valor"
+)
+.value="";
 
 }
+
+arrecadado=
+Number(
+localStorage
+.getItem(
+"valor"
+)
+)||0;
 
 atualizar();
