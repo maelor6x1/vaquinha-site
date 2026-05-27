@@ -2,7 +2,7 @@ export default async function handler(req, res) {
 
 if (req.method !== "POST") {
 return res.status(405).json({
-erro:"Método inválido"
+erro:"Método não permitido"
 });
 }
 
@@ -14,11 +14,9 @@ const resposta =
 await fetch(
 "https://api.mercadopago.com/v1/payments",
 {
-
 method:"POST",
 
 headers:{
-
 Authorization:
 `Bearer ${process.env.MP_TOKEN}`,
 
@@ -27,7 +25,6 @@ Authorization:
 
 "X-Idempotency-Key":
 crypto.randomUUID()
-
 },
 
 body:
@@ -37,14 +34,14 @@ transaction_amount:
 Number(valor),
 
 description:
-"Contribuição Vaquinha",
+"Contribuição",
 
 payment_method_id:
 "pix",
 
 payer:{
 email:
-"comprador@email.com"
+"teste@email.com"
 }
 
 })
@@ -53,32 +50,41 @@ email:
 
 );
 
-const data =
+const dados =
 await resposta.json();
 
-res.json({
+if (
+!dados.point_of_interaction
+){
+
+return res
+.status(400)
+.json({
+erro:dados
+});
+
+}
+
+return res.json({
 
 pix:
-data
-?.point_of_interaction
-?.transaction_data
-?.qr_code,
+dados
+.point_of_interaction
+.transaction_data
+.qr_code,
 
 qr:
-data
-?.point_of_interaction
-?.transaction_data
-?.qr_code_base64,
-
-erro:
-data
+dados
+.point_of_interaction
+.transaction_data
+.qr_code_base64
 
 });
 
 }
 catch(e){
 
-res
+return res
 .status(500)
 .json({
 
