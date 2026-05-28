@@ -17,7 +17,7 @@ res
 ){
 
 if(
-req.method!=="POST"
+req.method !== "POST"
 ){
 
 return res
@@ -41,7 +41,7 @@ req.body.valor
 const resposta =
 await fetch(
 
-"https://app.sigilopay.com.br/api/v1/gateway/pix/receive",
+"https://api.misticpay.com/api/transactions/create",
 
 {
 
@@ -52,38 +52,31 @@ headers:{
 "Content-Type":
 "application/json",
 
-"x-public-key":
-process.env.SIGILO_PUBLIC,
+ci:
+process.env.MISTIC_CLIENT_ID,
 
-"x-secret-key":
-process.env.SIGILO_SECRET
+cs:
+process.env.MISTIC_CLIENT_SECRET
 
 },
 
 body:
 JSON.stringify({
 
-identifier:
-"vak_"+Date.now(),
-
 amount:
 valor,
 
-client:{
-
-name:
+payerName:
 "Contribuinte",
 
-email:
-"cliente@email.com",
+payerDocument:
+"12345678909",
 
-phone:
-"11999999999",
+transactionId:
+"vak_"+Date.now(),
 
-document:
-"12345678900"
-
-}
+description:
+"Contribuição Vaquinha"
 
 })
 
@@ -94,15 +87,35 @@ document:
 const data =
 await resposta.json();
 
+if(
+!resposta.ok
+){
+
+return res
+.status(400)
+.json({
+
+erro:
+data
+
+});
+
+}
+
 return res.json({
 
 pix:
 data
-?.pix
-?.code,
+?.data
+?.copyPaste,
 
 qr:
-`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(data?.pix?.code||"")}`
+data
+?.data
+?.qrCodeBase64,
+
+raw:
+data
 
 });
 
