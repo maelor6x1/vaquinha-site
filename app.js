@@ -125,7 +125,10 @@ resultado.innerHTML =
 
 `
 
-<pre>
+<pre style="
+text-align:left;
+white-space:pre-wrap;
+">
 
 ${JSON.stringify(
 data.erro,
@@ -156,6 +159,11 @@ Escaneie o PIX
 
 <img
 src="${data.qr}"
+style="
+width:230px;
+border-radius:20px;
+"
+
 >
 
 <textarea readonly>
