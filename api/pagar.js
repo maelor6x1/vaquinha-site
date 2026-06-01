@@ -38,10 +38,25 @@ parseBrl(
 req.body.valor
 );
 
+if(
+valor < 1
+){
+
+return res
+.status(400)
+.json({
+
+erro:
+"Valor minimo R$ 1,00"
+
+});
+
+}
+
 const resposta =
 await fetch(
 
-"https://api.misticpay.com/api/transactions/create",
+"https://nexuspag.com/api/pix/create",
 
 {
 
@@ -52,11 +67,8 @@ headers:{
 "Content-Type":
 "application/json",
 
-ci:
-process.env.MISTIC_CLIENT_ID,
-
-cs:
-process.env.MISTIC_CLIENT_SECRET
+"x-api-key":
+process.env.NEXUSPAG_API_KEY
 
 },
 
@@ -66,17 +78,14 @@ JSON.stringify({
 amount:
 valor,
 
-payerName:
-"Contribuinte",
+description:
+"Contribuição Vaquinha",
 
-payerDocument:
-"12345678909",
-
-transactionId:
+external_id:
 "vak_"+Date.now(),
 
-description:
-"Contribuição Vaquinha"
+expiration:
+1800
 
 })
 
@@ -92,7 +101,9 @@ if(
 ){
 
 return res
-.status(400)
+.status(
+resposta.status
+)
 .json({
 
 erro:
@@ -106,16 +117,23 @@ return res.json({
 
 pix:
 data
-?.data
-?.copyPaste,
+?.transaction
+?.pix_copia_cola,
 
 qr:
 data
-?.data
-?.qrCodeBase64,
+?.transaction
+?.qr_code_base64,
 
-raw:
+id:
 data
+?.transaction
+?.id,
+
+status:
+data
+?.transaction
+?.status
 
 });
 
