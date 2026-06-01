@@ -3,7 +3,7 @@ document.getElementById(
 "valor"
 );
 
-const meta = 5000;
+const meta = 30000;
 
 let arrecadado =
 Number(
