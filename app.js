@@ -17,7 +17,10 @@ atualizarBarra();
 function atualizarBarra(){
 
 const porcentagem =
-(arrecadado/meta)*100;
+Math.min(
+(arrecadado/meta)*100,
+100
+);
 
 document
 .getElementById(
@@ -32,7 +35,29 @@ document
 )
 .innerText =
 
-`R$ ${arrecadado.toFixed(2)} arrecadados`;
+`R$ ${arrecadado.toLocaleString(
+"pt-BR",
+{
+minimumFractionDigits:2
+}
+)} arrecadados`;
+
+}
+
+function setValor(v){
+
+document
+.getElementById(
+"valor"
+)
+.value =
+
+v.toLocaleString(
+"pt-BR",
+{
+minimumFractionDigits:2
+}
+);
 
 }
 
@@ -69,7 +94,7 @@ input.value;
 if(!valor){
 
 alert(
-"Digite um valor"
+"Digite um valor para contribuir ❤️"
 );
 
 return;
@@ -81,9 +106,9 @@ document.getElementById(
 "btn"
 );
 
-btn.disabled=true;
+btn.disabled = true;
 
-btn.innerText=
+btn.innerText =
 "Gerando PIX...";
 
 const resultado =
@@ -125,10 +150,18 @@ resultado.innerHTML =
 
 `
 
-<pre style="
-text-align:left;
-white-space:pre-wrap;
+<div style="
+background:#ffe5e5;
+padding:15px;
+border-radius:15px;
+color:#b00020;
 ">
+
+Erro ao gerar PIX
+
+<br><br>
+
+<small>
 
 ${JSON.stringify(
 data.erro,
@@ -136,7 +169,9 @@ null,
 2
 )}
 
-</pre>
+</small>
+
+</div>
 
 `;
 
@@ -151,20 +186,32 @@ resultado.innerHTML =
 
 `
 
+<div style="
+background:white;
+padding:20px;
+border-radius:25px;
+box-shadow:0 5px 15px rgba(0,0,0,.05);
+">
+
 <h2>
-
-Escaneie o PIX
-
+🎉 Obrigado pelo apoio!
 </h2>
+
+<p style="
+margin:10px 0 20px;
+color:#666;
+">
+Escaneie o QR Code ou copie o PIX abaixo.
+</p>
 
 <img
 src="${data.qr}"
 style="
-width:230px;
+width:240px;
 border-radius:20px;
+margin-bottom:15px;
 "
-
->
+/>
 
 <textarea readonly>
 
@@ -175,8 +222,10 @@ ${data.pix}
 <br><br>
 
 <button onclick="copiarPix()">
-Copiar código PIX
+📋 Copiar código PIX
 </button>
+
+</div>
 
 `;
 
@@ -201,7 +250,21 @@ atualizarBarra();
 catch(e){
 
 resultado.innerHTML =
-e.message;
+
+`
+
+<div style="
+background:#ffe5e5;
+padding:15px;
+border-radius:15px;
+color:#b00020;
+">
+
+${e.message}
+
+</div>
+
+`;
 
 }
 
@@ -219,7 +282,7 @@ window.pixCode
 );
 
 alert(
-"PIX copiado!"
+"✅ Código PIX copiado!"
 );
 
 }
