@@ -19,7 +19,7 @@ box-sizing:border-box;
 
 body{
 
-font-family:Arial, sans-serif;
+font-family:Arial,sans-serif;
 background:var(--bg);
 padding:20px;
 color:var(--text);
@@ -30,6 +30,24 @@ color:var(--text);
 
 max-width:500px;
 margin:auto;
+
+}
+
+.banner{
+
+width:100%;
+height:280px;
+
+object-fit:cover;
+
+border-radius:28px;
+
+margin-bottom:20px;
+
+box-shadow:
+0 10px 30px rgba(0,0,0,.10);
+
+display:block;
 
 }
 
@@ -45,6 +63,7 @@ margin-bottom:25px;
 
 font-size:42px;
 margin-bottom:10px;
+line-height:1.2;
 
 }
 
@@ -61,7 +80,9 @@ background:white;
 padding:25px;
 border-radius:28px;
 margin-bottom:25px;
-box-shadow:0 10px 30px rgba(0,0,0,.06);
+
+box-shadow:
+0 10px 30px rgba(0,0,0,.06);
 
 }
 
@@ -84,7 +105,10 @@ background:white;
 padding:25px;
 border-radius:28px;
 margin-bottom:25px;
-box-shadow:0 10px 30px rgba(0,0,0,.06);
+
+box-shadow:
+0 10px 30px rgba(0,0,0,.06);
+
 border:2px solid rgba(34,197,94,.15);
 
 }
@@ -126,14 +150,16 @@ overflow:hidden;
 
 width:15%;
 height:100%;
-background:linear-gradient(
+
+background:
+linear-gradient(
 90deg,
 var(--purple),
 var(--purpleDark)
 );
 
 border-radius:100px;
-transition:0.5s;
+transition:.5s;
 
 }
 
@@ -151,7 +177,9 @@ background:white;
 padding:25px;
 border-radius:28px;
 margin-bottom:25px;
-box-shadow:0 10px 30px rgba(0,0,0,.06);
+
+box-shadow:
+0 10px 30px rgba(0,0,0,.06);
 
 }
 
@@ -186,7 +214,10 @@ border-bottom:none;
 background:white;
 padding:25px;
 border-radius:28px;
-box-shadow:0 10px 30px rgba(0,0,0,.06);
+
+box-shadow:
+0 10px 30px rgba(0,0,0,.06);
+
 border:2px solid rgba(34,197,94,.15);
 
 }
@@ -222,7 +253,10 @@ border-radius:14px;
 
 display:flex;
 align-items:center;
-border-bottom:2px solid #DDD;
+
+border-bottom:
+2px solid #DDD;
+
 padding-bottom:10px;
 margin-bottom:30px;
 
@@ -251,14 +285,20 @@ button{
 
 width:100%;
 height:58px;
+
 border:none;
 border-radius:100px;
+
 background:var(--purple);
+
 color:white;
+
 font-size:17px;
 font-weight:bold;
+
 cursor:pointer;
-transition:0.2s;
+
+transition:.2s;
 
 }
 
@@ -285,10 +325,15 @@ margin-bottom:20px;
 #resultado img{
 
 width:240px;
+
 background:white;
+
 padding:10px;
+
 border-radius:18px;
-box-shadow:0 5px 15px rgba(0,0,0,.08);
+
+box-shadow:
+0 5px 15px rgba(0,0,0,.08);
 
 }
 
@@ -296,11 +341,17 @@ textarea{
 
 width:100%;
 height:120px;
+
 margin-top:20px;
+
 padding:15px;
+
 border-radius:15px;
+
 border:1px solid #DDD;
+
 resize:none;
+
 font-size:13px;
 
 }
@@ -308,11 +359,17 @@ font-size:13px;
 .thanks{
 
 background:white;
+
 padding:25px;
+
 border-radius:28px;
+
 margin-top:25px;
+
 text-align:center;
-box-shadow:0 10px 30px rgba(0,0,0,.06);
+
+box-shadow:
+0 10px 30px rgba(0,0,0,.06);
 
 }
 
@@ -334,6 +391,12 @@ color:#666;
 .container{
 
 max-width:100%;
+
+}
+
+.banner{
+
+height:220px;
 
 }
 
