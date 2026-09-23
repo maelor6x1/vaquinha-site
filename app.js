@@ -10,7 +10,7 @@ Number(
 localStorage.getItem(
 "arrecadado"
 )
-)||437.82;
+)||467.51;
 
 atualizarBarra();
 
