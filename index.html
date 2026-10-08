@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Ajude o Thor a custear o tratamento e a cirurgia contra o câncer. Cada contribuição faz diferença.">
+  <title>Ajude o Thor a vencer o câncer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#inicio" aria-label="Campanha do Thor, início">
+      <span class="brand-mark" aria-hidden="true">♥</span>
+      <span>Ajude o Thor</span>
+    </a>
+    <button class="icon-button" id="headerShare" type="button" aria-label="Compartilhar campanha">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.7 10.7 6.6-4.4M8.7 13.3l6.6 4.4"></path></svg>
+    </button>
+  </header>
+
+  <main class="container">
+    <section id="campaignScreen" class="screen active" aria-labelledby="campaignTitle">
+      <article class="campaign-card">
+        <img src="./IMG_1531.jpeg" class="hero-image" alt="Thor, o cachorro que precisa de ajuda para tratar o câncer">
+        <div class="campaign-content">
+          <div class="eyebrow"><span class="dot"></span> CAMPANHA SOLIDÁRIA</div>
+          <h1 id="campaignTitle">Ajude o Thor a vencer o câncer</h1>
+          <p class="lead">Uma chance de tratamento, esperança e mais momentos felizes ao lado de quem ama.</p>
+
+          <section class="story">
+            <h2>Conheça a história do Thor</h2>
+            <p>O Thor precisa de ajuda para custear o tratamento e a cirurgia contra o câncer. Os custos veterinários são difíceis de enfrentar sozinho, e cada contribuição pode ajudar a aproximá-lo do cuidado de que precisa.</p>
+            <p>Qualquer valor é bem-vindo. Se você não puder contribuir agora, compartilhar esta campanha também ajuda muito a fazer a história do Thor chegar a mais pessoas. ❤️</p>
+            <p class="honesty-note">As doações desta campanha são destinadas aos custos do tratamento e da cirurgia do Thor.</p>
+          </section>
+
+          <section class="fundraising-card" aria-label="Progresso da arrecadação">
+            <div class="fundraising-top">
+              <div><span class="muted">Arrecadado</span><strong id="raisedAmount">R$ 467,51</strong></div>
+              <div class="goal"><span class="muted">Meta</span><strong>R$ 30.000,00</strong></div>
+            </div>
+            <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+            <div class="progress-caption"><strong id="progressPercent">1,6%</strong><span id="remainingText">Cada ajuda faz diferença</span></div>
+            <div class="supporter-count"><span class="avatar-stack" aria-hidden="true">♥</span><span><strong id="supporterCount">137</strong> apoiadores</span></div>
+          </section>
+
+          <div class="action-buttons">
+            <button class="button button-primary" id="contributeButton" type="button">Quero contribuir <span aria-hidden="true">→</span></button>
+            <button class="button button-secondary" id="shareButton" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.7 10.7 6.6-4.4M8.7 13.3l6.6 4.4"></path></svg> Compartilhar campanha</button>
+          </div>
+        </div>
+      </article>
+
+      <section class="supporters-card">
+        <div class="section-heading"><div><span class="eyebrow">GRATIDÃO</span><h2>Últimos apoiadores</h2></div><span class="heart-bubble">♥</span></div>
+        <ul id="supportersList" class="supporters-list">
+          <li><span class="supporter-avatar">N</span><span class="supporter-name">Nayara</span><strong>R$ 25,00</strong></li>
+          <li><span class="supporter-avatar">K</span><span class="supporter-name">Kassandra</span><strong>R$ 1,00</strong></li>
+          <li><span class="supporter-avatar">S</span><span class="supporter-name">Sophia</span><strong>R$ 3,00</strong></li>
+          <li><span class="supporter-avatar">C</span><span class="supporter-name">Carlos</span><strong>R$ 30,00</strong></li>
+          <li><span class="supporter-avatar">F</span><span class="supporter-name">Fernanda</span><strong>R$ 100,00</strong></li>
+        </ul>
+        <p class="small-note">Obrigado a cada pessoa que ajuda o Thor. ❤️</p>
+      </section>
+    </section>
+
+    <section id="donationScreen" class="screen donation-screen" aria-labelledby="donationTitle" hidden>
+      <button class="back-button" id="backButton" type="button"><span aria-hidden="true">←</span> Voltar para a campanha</button>
+      <div class="donation-heading">
+        <div class="donation-icon" aria-hidden="true">♥</div>
+        <span class="eyebrow">SUA AJUDA IMPORTA</span>
+        <h1 id="donationTitle">Contribua com o Thor</h1>
+        <p>Escolha o valor da sua doação. O pagamento é feito exclusivamente por PIX.</p>
+      </div>
+
+      <form id="donationForm" class="donation-card">
+        <label class="field-label">Valor da contribuição</label>
+        <div class="amount-grid" role="group" aria-label="Valores sugeridos">
+          <button class="amount-option" type="button" data-amount="5">R$ 5</button>
+          <button class="amount-option selected" type="button" data-amount="10" aria-pressed="true">R$ 10</button>
+          <button class="amount-option" type="button" data-amount="25">R$ 25</button>
+          <button class="amount-option" type="button" data-amount="50">R$ 50</button>
+        </div>
+        <label for="amountInput" class="field-label amount-label">Ou digite outro valor</label>
+        <div class="currency-input"><span>R$</span><input id="amountInput" name="amount" type="text" inputmode="decimal" autocomplete="off" value="10,00" aria-describedby="minimumHint"></div>
+        <p id="minimumHint" class="field-hint">Valor mínimo para doar: R$ 1,00.</p>
+
+        <label for="donorName" class="field-label name-label">Nome completo <span>(opcional)</span></label>
+        <input id="donorName" name="name" class="text-input" type="text" maxlength="100" autocomplete="name" placeholder="Como podemos te chamar?">
+        <p class="field-hint">Não pedimos CPF, telefone nem e-mail.</p>
+
+        <div class="pix-info"><span class="pix-symbol">₱</span><div><strong>Pagamento via PIX</strong><p>Rápido, simples e sem cadastro.</p></div><span class="pix-check">✓</span></div>
+        <button id="generatePixButton" class="button button-primary generate-button" type="submit">Gerar PIX <span aria-hidden="true">→</span></button>
+        <p class="secure-note"><span aria-hidden="true">🔒</span> Você só verá uma cobrança real quando confirmar a geração do PIX.</p>
+        <div id="paymentResult" class="payment-result" aria-live="polite"></div>
+      </form>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
