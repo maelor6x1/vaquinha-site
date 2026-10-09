@@ -67,6 +67,35 @@ function updateProgress(raised = INITIAL_RAISED, supporters = INITIAL_SUPPORTERS
   $("remainingText").textContent = raised >= GOAL ? "Meta alcançada!" : "Cada ajuda faz diferença";
   $("supporterCount").textContent = supporters.toLocaleString("pt-BR");
 }
+
+async function loadCampaignSummary() {
+  try {
+    const response = await fetch("/api/resumo", { cache: "no-store" });
+    if (!response.ok) return;
+    const summary = await response.json();
+    if (Number.isFinite(summary.arrecadado_centavos) && Number.isFinite(summary.apoiadores)) {
+      updateProgress(summary.arrecadado_centavos / 100, summary.apoiadores);
+    }
+    if (Array.isArray(summary.doacoes) && summary.doacoes.length) {
+      const list = $("supportersList");
+      summary.doacoes.slice(0, 10).reverse().forEach((donation) => {
+        const li = document.createElement("li");
+        const avatar = document.createElement("span");
+        avatar.className = "supporter-avatar";
+        avatar.textContent = String(donation.nome || "A").trim().charAt(0).toUpperCase() || "A";
+        const name = document.createElement("span");
+        name.className = "supporter-name";
+        name.textContent = donation.nome || "Apoiador anônimo";
+        const amount = document.createElement("strong");
+        amount.textContent = money(Number(donation.valor_centavos || 0) / 100);
+        li.append(avatar, name, amount);
+        list.prepend(li);
+      });
+    }
+  } catch (error) {
+    console.warn("Não foi possível atualizar o resumo da campanha.");
+  }
+}
 async function shareCampaign() {
   const shareData = {
     title: "Ajude o Thor a vencer o câncer",
@@ -217,3 +246,4 @@ donationForm.addEventListener("submit", async (event) => {
 });
 
 updateProgress();
+loadCampaignSummary();

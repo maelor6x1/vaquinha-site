@@ -27,3 +27,15 @@ Não configure um webhook sem antes confirmar na documentação da NexusPag o fo
 - Últimos nomes e valores: conforme a lista do site enviado.
 
 Observação: os dados históricos acima são preservados visualmente, mas não foram migrados para um banco. Confirme o total correto antes de ativar qualquer automação para evitar duplicidade.
+
+## Integração Supabase + NexusPag (versão atual)
+Variáveis de ambiente necessárias no Vercel:
+- `SUPABASE_URL`: Project URL do Supabase.
+- `SUPABASE_SECRET_KEY`: chave secreta do Supabase, somente no servidor.
+- `NEXUSPAG_API_KEY`: chave atual da NexusPag.
+- `WEBHOOK_SECRET`: segredo HMAC criado/configurado em NexusPag → Dashboard → Integrações → Webhooks.
+- `APP_BASE_URL`: URL pública principal do site, por exemplo `https://vaquinha-site.vercel.app`.
+
+O endpoint `/api/pagar` registra a contribuição como pendente antes de criar o PIX e envia `/api/webhook` como URL de webhook. O endpoint `/api/webhook` só aceita evento `payment.confirmed` assinado, com status `paid`, external_id correspondente e valor igual ao registro. `/api/resumo` publica apenas doações pagas. O resumo mantém como base histórica os R$ 467,51 e 137 apoiadores que já eram exibidos no site; esses números antigos ainda não foram importados para a tabela e não devem ser somados novamente se forem migrados depois.
+
+Depois de substituir os arquivos e fazer deploy, configure `APP_BASE_URL` e `WEBHOOK_SECRET` no Vercel e faça novo deploy. No painel NexusPag, ative a assinatura HMAC do webhook e use o mesmo segredo em `WEBHOOK_SECRET`. Configure também o endpoint global `https://vaquinha-site.vercel.app/api/webhook` se a integração da NexusPag exigir registro global; o código também envia a URL no campo `webhook_url` de cada cobrança.
