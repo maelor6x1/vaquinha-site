@@ -72,16 +72,19 @@ export default async function handler(req, res) {
   try {
     const amount = parseAmount(req.body?.valor);
     const name = typeof req.body?.nome === "string" ? req.body.nome.trim().slice(0, 100) : "";
+    const documentNumber = typeof req.body?.documento === "string" ? req.body.documento.replace(/\D/g, "") : "";
+
     if (!Number.isFinite(amount) || amount < 5) {
       return res.status(400).json({ erro: "O valor mínimo para doar é R$ 5,00." });
     }
     if (amount > 1000000) return res.status(400).json({ erro: "O valor máximo permitido é R$ 1.000.000,00." });
+    if (![11, 14].includes(documentNumber.length)) {
+      return res.status(400).json({ erro: "Informe um CPF com 11 dígitos ou CNPJ com 14 dígitos." });
+    }
 
     localReference = `thor_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
     const amountCents = Math.round(amount * 100);
 
-    // Registra a intenção antes de chamar o gateway. Se houver falha depois,
-    // o registro fica cancelado e não entra no total arrecadado.
     const insertResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/doacoes`, {
       method: "POST",
       headers: supabaseHeaders({ Prefer: "return=minimal" }),
@@ -93,6 +96,7 @@ export default async function handler(req, res) {
         pagamento_id: localReference
       })
     });
+
     if (!insertResponse.ok) {
       console.error("Supabase insert failed", insertResponse.status, await insertResponse.text().catch(() => ""));
       return res.status(502).json({ erro: "Não foi possível registrar a contribuição. Tente novamente." });
@@ -101,37 +105,51 @@ export default async function handler(req, res) {
     const payload = {
       amount_cents: amountCents,
       description: "Doação para o Thor",
-      external_reference: localReference
+      external_reference: localReference,
+      payer: { document: documentNumber }
     };
-    if (name) payload.payer = { name };
+
+    if (name) payload.payer.name = name;
 
     const { response: gatewayResponse, data } = await createCharge(apiKey, localReference, payload);
+
     if (!gatewayResponse.ok) {
       await updateDonation(localReference, { status: "cancelado" }).catch(() => {});
       console.error("Pix Black create charge failed", gatewayResponse.status, data?.message || "");
+
       if (gatewayResponse.status === 400 && Array.isArray(data?.issues)) {
         const minimumIssue = data.issues.find((issue) => issue.path === "amount_cents");
         if (minimumIssue) return res.status(400).json({ erro: "A Pix Black recusou esse valor. Confira o mínimo permitido para sua conta." });
       }
+
+      const gatewayMessage = typeof data?.message === "string" ? data.message : "";
+      if (/cpf|cnpj|documento/i.test(gatewayMessage)) {
+        return res.status(400).json({ erro: "A Pix Black recusou o documento informado. Confira os números e tente novamente." });
+      }
+
       return res.status(502).json({ erro: "A Pix Black não conseguiu gerar o PIX agora. Tente novamente." });
     }
 
     const chargeId = typeof data?.id === "string" ? data.id : "";
     const copyPaste = typeof data?.pix?.copy_paste === "string" ? data.pix.copy_paste : "";
+
     if (!chargeId || !copyPaste || Number(data.amount_cents) !== amountCents || data.status !== "pending") {
       await updateDonation(localReference, { status: "cancelado" }).catch(() => {});
       console.error("Pix Black returned an unexpected charge response");
       return res.status(502).json({ erro: "A Pix Black retornou dados de cobrança incompletos." });
     }
 
-    // O ID definitivo é o charge_id recebido nos webhooks. Se este PATCH falhar,
-    // o webhook ainda poderá localizar a linha pela external_reference local.
     const linkResponse = await updateDonation(localReference, { pagamento_id: chargeId });
     if (!linkResponse.ok) {
       console.error("Could not replace local reference with Pix Black charge id", linkResponse.status);
     }
 
-    const qrDataUrl = await QRCode.toDataURL(copyPaste, { errorCorrectionLevel: "M", margin: 2, width: 320 });
+    const qrDataUrl = await QRCode.toDataURL(copyPaste, {
+      errorCorrectionLevel: "M",
+      margin: 2,
+      width: 320
+    });
+
     return res.status(200).json({
       pix: copyPaste,
       qr: qrDataUrl,
