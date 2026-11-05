@@ -1,0 +1,116 @@
+:root {
+  --green: #18bd68;
+  --green-dark: #07984f;
+  --green-deep: #08633e;
+  --mint: #eaf9ef;
+  --text: #252a27;
+  --muted: #7c8580;
+  --line: #e7ece8;
+  --surface: #fff;
+  --background: #f7f9f7;
+  --danger: #b42332;
+  font-family: "Nunito Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; color: var(--text); background: var(--background); }
+button, input, textarea { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid #9ce9bb; outline-offset: 3px; }
+.site-header { position: sticky; top: 0; z-index: 10; min-height: 72px; padding: 12px max(20px, calc((100% - 900px)/2)); display: flex; align-items: center; justify-content: space-between; gap: 16px; background: rgba(255,255,255,.94); border-bottom: 1px solid #edf0ed; backdrop-filter: blur(14px); }
+.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--green-dark); text-decoration: none; font-size: 20px; font-weight: 900; letter-spacing: -.5px; }
+.brand-mark { display: grid; place-items: center; width: 36px; height: 36px; color: white; background: var(--green); border-radius: 12px 12px 12px 4px; font-size: 22px; }
+.icon-button { display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; color: var(--green-dark); }
+.icon-button:hover { background: var(--mint); }
+.icon-button svg, .button-secondary svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.container { width: min(100% - 28px, 760px); margin: 24px auto 56px; }
+.screen { animation: fade-in .25s ease both; }
+.screen[hidden] { display: none !important; }
+@keyframes fade-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.campaign-card, .supporters-card, .donation-card { background: var(--surface); border: 1px solid #edf0ed; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 35px rgba(20, 55, 35, .045); }
+.hero-image { display: block; width: 100%; max-height: 390px; aspect-ratio: 1.7 / 1; object-fit: cover; background: #e8eee9; }
+.campaign-content { padding: clamp(20px, 5vw, 34px); }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; color: var(--green-dark); font-size: 11px; font-weight: 900; letter-spacing: 1.25px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+h1, h2, p { margin-top: 0; }
+h1 { margin: 10px 0 10px; font-size: clamp(29px, 6vw, 43px); line-height: 1.08; letter-spacing: -1.4px; font-weight: 900; }
+.lead { margin: 0; color: var(--muted); font-size: 16px; line-height: 1.55; }
+.story { margin-top: 28px; }
+.story h2, .supporters-card h2 { margin: 0 0 12px; font-size: 20px; letter-spacing: -.4px; }
+.story p { margin: 0 0 12px; color: #58615b; line-height: 1.7; font-size: 15px; }
+.story .honesty-note { margin-top: 18px; padding: 12px 14px; background: #f2fbf5; border-left: 3px solid var(--green); border-radius: 4px 12px 12px 4px; color: var(--green-deep); font-size: 13px; }
+.fundraising-card { margin-top: 24px; padding: 18px; background: #f8fcf9; border: 1px solid #e7f4eb; border-radius: 18px; }
+.fundraising-top { display: flex; justify-content: space-between; gap: 18px; }
+.fundraising-top > div { display: flex; flex-direction: column; gap: 4px; }
+.fundraising-top .goal { text-align: right; }
+.muted { color: var(--muted); font-size: 12px; font-weight: 700; }
+.fundraising-top strong { color: var(--green-dark); font-size: clamp(19px, 4vw, 25px); font-weight: 900; }
+.fundraising-top .goal strong { color: var(--text); }
+.progress-track { height: 9px; margin-top: 16px; border-radius: 20px; background: #e5ebe6; overflow: hidden; }
+.progress-bar { width: 1.6%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #6bda94, var(--green-dark)); transition: width .35s ease; }
+.progress-caption { display: flex; justify-content: space-between; gap: 10px; margin-top: 8px; color: var(--muted); font-size: 12px; }
+.progress-caption strong { color: var(--green-dark); }
+.supporter-count { display: flex; align-items: center; gap: 9px; margin-top: 17px; padding-top: 14px; border-top: 1px solid #e8f0ea; color: #56615a; font-size: 13px; }
+.avatar-stack { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #d9f6e3; color: var(--green-dark); font-weight: 900; }
+.action-buttons { display: grid; gap: 11px; margin-top: 22px; }
+.button { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 58px; padding: 15px 18px; border: 0; border-radius: 14px; font-size: 17px; font-weight: 900; transition: transform .15s, background .15s, opacity .15s; }
+.button:active { transform: scale(.99); }
+.button:disabled { opacity: .65; cursor: wait; }
+.button-primary { color: white; background: var(--green-dark); box-shadow: 0 7px 16px rgba(7, 152, 79, .16); }
+.button-primary:hover { background: #087f45; }
+.button-secondary { color: #3f4942; background: white; border: 1.5px solid #d5ded7; }
+.button-secondary:hover { background: #f5fbf7; }
+.button-secondary svg { color: var(--green-dark); }
+.supporters-card { margin-top: 18px; padding: 22px; }
+.section-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.section-heading h2 { margin-top: 5px; }
+.heart-bubble { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--mint); color: var(--green-dark); }
+.supporters-list { list-style: none; padding: 0; margin: 0; }
+.supporters-list li { display: flex; align-items: center; gap: 11px; padding: 13px 0; border-bottom: 1px solid #eff2ef; }
+.supporters-list li:last-child { border-bottom: 0; }
+.supporter-avatar { display: grid; place-items: center; flex: 0 0 36px; width: 36px; height: 36px; border-radius: 50%; background: #eaf8ee; color: #13864a; font-weight: 900; }
+.supporter-name { flex: 1; color: #414a44; font-weight: 700; }
+.supporters-list strong { font-size: 14px; }
+.small-note { margin: 12px 0 0; color: var(--muted); font-size: 12px; }
+.donation-screen { max-width: 580px; margin: 0 auto; }
+.back-button { display: inline-flex; align-items: center; gap: 9px; padding: 8px 0; margin-bottom: 22px; border: 0; color: #536057; background: transparent; font-size: 14px; font-weight: 800; }
+.back-button span { font-size: 24px; line-height: 1; }
+.donation-heading { text-align: center; padding: 6px 14px 24px; }
+.donation-icon { display: grid; place-items: center; width: 54px; height: 54px; margin: 0 auto 15px; border-radius: 18px; background: var(--mint); color: var(--green-dark); font-size: 28px; }
+.donation-heading h1 { font-size: clamp(29px, 6vw, 36px); }
+.donation-heading p { max-width: 380px; margin: 0 auto; color: var(--muted); font-size: 14px; line-height: 1.6; }
+.donation-card { padding: clamp(20px, 5vw, 30px); overflow: visible; }
+.field-label { display: block; margin-bottom: 12px; color: #303a33; font-size: 14px; font-weight: 900; }
+.amount-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+.amount-option { min-height: 48px; padding: 8px 4px; border: 1px solid #d8e3db; border-radius: 12px; color: #3d5746; background: white; font-weight: 800; }
+.amount-option.selected { border-color: var(--green-dark); color: var(--green-deep); background: #e9f9ef; box-shadow: inset 0 0 0 1px var(--green-dark); }
+.amount-label { margin-top: 22px; }
+.currency-input { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 0 16px; border: 1.5px solid #d9e2db; border-radius: 13px; background: #fff; }
+.currency-input:focus-within { border-color: var(--green-dark); }
+.currency-input span { color: #718077; font-weight: 800; }
+.currency-input input { width: 100%; min-width: 0; border: 0; outline: 0; color: var(--text); background: transparent; font-size: 25px; font-weight: 900; }
+.field-hint { margin: 8px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.name-label { margin-top: 24px; }
+.name-label span { color: var(--muted); font-weight: 600; }
+.text-input { width: 100%; min-height: 54px; padding: 13px 15px; border: 1.5px solid #d9e2db; border-radius: 13px; color: var(--text); background: white; font-size: 15px; }
+.text-input::placeholder { color: #a0a8a2; }
+.pix-info { display: flex; align-items: center; gap: 12px; margin-top: 24px; padding: 14px; border: 1px solid #d8efdf; border-radius: 14px; background: #f4fcf6; }
+.pix-symbol { display: grid; place-items: center; flex: 0 0 40px; width: 40px; height: 40px; border-radius: 12px; background: #d9f5e3; color: var(--green-deep); font-size: 22px; font-weight: 900; }
+.pix-info > div { flex: 1; }
+.pix-info strong { font-size: 14px; }
+.pix-info p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+.pix-check { color: var(--green-dark); font-size: 20px; font-weight: 900; }
+.generate-button { margin-top: 20px; }
+.secure-note { margin: 13px 0 0; color: var(--muted); text-align: center; font-size: 11px; line-height: 1.5; }
+.payment-result { margin-top: 18px; }
+.pix-result-card { padding: 18px; border: 1px solid #e1eae3; border-radius: 16px; background: #fbfdfb; text-align: center; }
+.pix-result-card h2 { margin-bottom: 8px; font-size: 22px; }
+.pix-result-card > p { color: #68736b; font-size: 13px; line-height: 1.5; }
+.pix-qr { display: block; width: min(100%, 250px); aspect-ratio: 1; object-fit: contain; margin: 16px auto; border: 1px solid #e6ebe7; border-radius: 12px; background: white; }
+.pix-code { display: block; width: 100%; min-height: 100px; margin: 0 0 12px; padding: 12px; border: 1px solid #dce5de; border-radius: 10px; resize: vertical; overflow-wrap: anywhere; font-size: 12px; }
+.copy-button { min-height: 48px; font-size: 14px; }
+.error-message { padding: 13px; border-radius: 12px; color: var(--danger); background: #fff0f0; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.toast { position: fixed; z-index: 20; left: 50%; bottom: max(22px, env(safe-area-inset-bottom)); width: max-content; max-width: calc(100% - 32px); padding: 12px 17px; border-radius: 14px; color: white; background: #202a23; box-shadow: 0 10px 30px #0002; font-size: 13px; font-weight: 800; opacity: 0; pointer-events: none; transform: translate(-50%, 12px); transition: opacity .2s, transform .2s; }
+.toast.visible { opacity: 1; transform: translate(-50%, 0); }
+@media (min-width: 760px) { .container { margin-top: 34px; } .campaign-content { padding: 34px 40px 38px; } .action-buttons { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 420px) { .container { width: min(100% - 20px, 760px); margin-top: 12px; } .site-header { padding-left: 14px; padding-right: 14px; } .brand { font-size: 18px; } .campaign-card, .supporters-card, .donation-card { border-radius: 19px; } .hero-image { aspect-ratio: 1.35 / 1; } .fundraising-card { padding: 14px; } .fundraising-top strong { font-size: 18px; } .progress-caption { font-size: 11px; } .amount-grid { gap: 6px; } .amount-option { font-size: 13px; } }

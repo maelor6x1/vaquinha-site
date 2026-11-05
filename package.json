@@ -1,0 +1,8 @@
+{
+  "name": "vaquinha-do-thor",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  }
+}
