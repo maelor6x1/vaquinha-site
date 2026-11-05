@@ -200,10 +200,26 @@ amountInput.addEventListener("blur", () => {
   if (Number.isFinite(amount) && amount >= 5) amountInput.value = formatInput(amount);
 });
 
+$("donorDocument").addEventListener("input", (event) => {
+  const input = event.currentTarget;
+  const digits = input.value.replace(/\D/g, "").slice(0, 14);
+  if (digits.length <= 11) {
+    let formatted = digits;
+    if (digits.length > 3) formatted = `${digits.slice(0, 3)}.${digits.slice(3)}`;
+    if (digits.length > 6) formatted = `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+    if (digits.length > 9) formatted = `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+    input.value = formatted;
+  } else {
+    input.value = `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8, 12)}-${digits.slice(12)}`;
+  }
+});
+
 donationForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const amount = parseAmount(amountInput.value);
   const name = $("donorName").value.trim();
+  const documentInput = $("donorDocument");
+  const documentNumber = documentInput.value.replace(/\D/g, "");
 
   if (!Number.isFinite(amount) || amount < 5) {
     showToast("O valor mínimo para doar é R$ 5,00.");
@@ -215,6 +231,11 @@ donationForm.addEventListener("submit", async (event) => {
     amountInput.focus();
     return;
   }
+  if (![11, 14].includes(documentNumber.length)) {
+    showToast("Digite um CPF com 11 dígitos ou CNPJ com 14 dígitos.");
+    documentInput.focus();
+    return;
+  }
 
   generatePixButton.disabled = true;
   generatePixButton.textContent = "Gerando PIX…";
@@ -223,7 +244,7 @@ donationForm.addEventListener("submit", async (event) => {
     const response = await fetch("/api/pagar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ valor: amount.toFixed(2), nome: name })
+      body: JSON.stringify({ valor: amount.toFixed(2), nome: name, documento: documentNumber })
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || data.erro) {
