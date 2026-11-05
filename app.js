@@ -1,6 +1,6 @@
 
 const INITIAL_RAISED = 467.51;
-const GOAL = 30000;
+const GOAL = 10000;
 const INITIAL_SUPPORTERS = 137;
 
 const $ = (id) => document.getElementById(id);
