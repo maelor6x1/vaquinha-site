@@ -91,11 +91,13 @@
 
         <label for="donorName" class="field-label name-label">Nome completo <span>(opcional)</span></label>
         <input id="donorName" name="name" class="text-input" type="text" maxlength="100" autocomplete="name" placeholder="Como podemos te chamar?">
-        <p class="field-hint">Não pedimos CPF, telefone nem e-mail.</p>
+        <label for="donorDocument" class="field-label document-label">CPF ou CNPJ <span>(obrigatório)</span></label>
+        <input id="donorDocument" name="document" class="text-input" type="text" inputmode="numeric" autocomplete="off" maxlength="18" placeholder="Digite seu CPF ou CNPJ" aria-describedby="documentHint" required>
+        <p id="documentHint" class="field-hint">Esse dado é exigido pela Pix Black para gerar a cobrança. Ele não será exibido na página pública nem salvo no histórico de doações.</p>
 
         <div class="pix-info"><span class="pix-symbol">₱</span><div><strong>Pagamento via PIX</strong><p>Rápido, simples e sem cadastro.</p></div><span class="pix-check">✓</span></div>
         <button id="generatePixButton" class="button button-primary generate-button" type="submit">Gerar PIX <span aria-hidden="true">→</span></button>
-        <p class="secure-note"><span aria-hidden="true">🔒</span> Você só verá uma cobrança real quando confirmar a geração do PIX.</p>
+        <p class="secure-note"><span aria-hidden="true">🔒</span> Seu documento será enviado à Pix Black somente para solicitar a cobrança PIX. Consulte a política de privacidade do provedor para saber como ele trata esses dados.</p>
         <div id="paymentResult" class="payment-result" aria-live="polite"></div>
       </form>
     </section>
