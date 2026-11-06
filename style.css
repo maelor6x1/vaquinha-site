@@ -114,6 +114,3 @@ h1 { margin: 10px 0 10px; font-size: clamp(29px, 6vw, 43px); line-height: 1.08; 
 .toast.visible { opacity: 1; transform: translate(-50%, 0); }
 @media (min-width: 760px) { .container { margin-top: 34px; } .campaign-content { padding: 34px 40px 38px; } .action-buttons { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 420px) { .container { width: min(100% - 20px, 760px); margin-top: 12px; } .site-header { padding-left: 14px; padding-right: 14px; } .brand { font-size: 18px; } .campaign-card, .supporters-card, .donation-card { border-radius: 19px; } .hero-image { aspect-ratio: 1.35 / 1; } .fundraising-card { padding: 14px; } .fundraising-top strong { font-size: 18px; } .progress-caption { font-size: 11px; } .amount-grid { gap: 6px; } .amount-option { font-size: 13px; } }
-
-.document-label { margin-top: 24px; }
-.document-label span { color: var(--muted); font-weight: 600; }

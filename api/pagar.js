@@ -1,361 +1,70 @@
-
-import QRCode from "qrcode";
-
 function parseAmount(value) {
-  if (typeof value === "number") {
-    return Number.isFinite(value)
-      ? Math.round(value * 100) / 100
-      : NaN;
-  }
-
+  if (typeof value === "number") return Number.isFinite(value) ? Math.round(value * 100) / 100 : NaN;
   if (typeof value !== "string") return NaN;
-
-  const cleaned = value
-    .trim()
-    .replace(/\s/g, "")
-    .replace(/^R\$/i, "");
-
+  const cleaned = value.trim().replace(/\s/g, "").replace(/^R\$/i, "");
   if (!cleaned) return NaN;
-
-  const normalized = cleaned.includes(",")
-    ? cleaned.replace(/\./g, "").replace(",", ".")
-    : cleaned;
-
+  const normalized = cleaned.includes(",") ? cleaned.replace(/\./g, "").replace(",", ".") : cleaned;
   const amount = Number(normalized);
-
-  return Number.isFinite(amount)
-    ? Math.round(amount * 100) / 100
-    : NaN;
-}
-
-function supabaseHeaders(extra = {}) {
-  const key = process.env.SUPABASE_SECRET_KEY;
-
-  return {
-    apikey: key,
-    Authorization: `Bearer ${key}`,
-    "Content-Type": "application/json",
-    ...extra
-  };
-}
-
-async function updateDonation(reference, fields) {
-  const url =
-    `${process.env.SUPABASE_URL}/rest/v1/doacoes?pagamento_id=eq.${encodeURIComponent(reference)}`;
-
-  return fetch(url, {
-    method: "PATCH",
-    headers: supabaseHeaders({
-      Prefer: "return=minimal"
-    }),
-    body: JSON.stringify(fields)
-  });
-}
-
-function wait(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function createCharge(apiKey, idempotencyKey, payload) {
-  let lastError;
-
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    try {
-      const response = await fetch(
-        "https://pixxblack.com/api/v1/charges",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-            "Idempotency-Key": idempotencyKey
-          },
-          body: JSON.stringify(payload)
-        }
-      );
-
-      const data = await response.json().catch(() => ({}));
-
-      if (
-        (response.status === 429 || response.status === 503) &&
-        attempt < 2
-      ) {
-        await wait(attempt === 0 ? 1000 : 2000);
-        continue;
-      }
-
-      return { response, data };
-
-    } catch (error) {
-      lastError = error;
-
-      if (attempt < 2) {
-        await wait(attempt === 0 ? 1000 : 2000);
-      }
-    }
-  }
-
-  throw lastError || new Error(
-    "Não foi possível conectar à Pix Black."
-  );
+  return Number.isFinite(amount) ? Math.round(amount * 100) / 100 : NaN;
 }
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
-
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
-
-    return res.status(405).json({
-      erro: "Método não permitido."
-    });
+    return res.status(405).json({ erro: "Método não permitido." });
   }
 
-  const apiKey = process.env.PIXBLACK_API_KEY;
-
-  if (!apiKey) {
-    return res.status(500).json({
-      erro: "A chave da Pix Black ainda não está configurada no servidor."
-    });
-  }
-
-  if (
-    !process.env.SUPABASE_URL ||
-    !process.env.SUPABASE_SECRET_KEY
-  ) {
-    return res.status(500).json({
-      erro: "O banco de dados ainda não está configurado no servidor."
-    });
-  }
-
-  let localReference = "";
+  const apiKey = process.env.NEXUSPAG_API_KEY;
+  if (!apiKey) return res.status(500).json({ erro: "O gateway ainda não está configurado no servidor." });
 
   try {
-    const amount = parseAmount(req.body?.valor);
-
-    const name =
-      typeof req.body?.nome === "string"
-        ? req.body.nome.trim().replace(/\s+/g, " ").slice(0, 100)
-        : "";
-
-    const documentNumber =
-      typeof req.body?.documento === "string"
-        ? req.body.documento.replace(/\D/g, "")
-        : "";
-
-    // Nome e documento obrigatórios
-    if (!name && !documentNumber) {
-      return res.status(400).json({
-        erro: "Preencha seu nome completo e CPF/CNPJ para continuar."
-      });
+    const valor = parseAmount(req.body?.valor);
+    const nome = typeof req.body?.nome === "string" ? req.body.nome.trim().slice(0, 100) : "";
+    if (!Number.isFinite(valor) || valor < 1) {
+      return res.status(400).json({ erro: "O valor mínimo para doar é R$ 1,00." });
     }
+    if (valor > 1000000) return res.status(400).json({ erro: "O valor informado é muito alto." });
 
-    if (!name) {
-      return res.status(400).json({
-        erro: "Por favor, informe seu nome completo."
-      });
-    }
-
-    if (name.split(/\s+/).filter(Boolean).length < 2) {
-      return res.status(400).json({
-        erro: "Informe seu nome completo, incluindo sobrenome."
-      });
-    }
-
-    if (!documentNumber) {
-      return res.status(400).json({
-        erro: "Por favor, informe seu CPF ou CNPJ."
-      });
-    }
-
-    if (![11, 14].includes(documentNumber.length)) {
-      return res.status(400).json({
-        erro: "Digite um CPF com 11 dígitos ou CNPJ com 14 dígitos."
-      });
-    }
-
-    if (!Number.isFinite(amount) || amount < 5) {
-      return res.status(400).json({
-        erro: "O valor mínimo para doar é R$ 5,00."
-      });
-    }
-
-    if (amount > 1000000) {
-      return res.status(400).json({
-        erro: "O valor máximo permitido é R$ 1.000.000,00."
-      });
-    }
-
-    localReference =
-      `thor_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
-
-    const amountCents = Math.round(amount * 100);
-
-    // Registra a doação pendente no Supabase
-    const insertResponse = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/doacoes`,
-      {
-        method: "POST",
-        headers: supabaseHeaders({
-          Prefer: "return=minimal"
-        }),
-        body: JSON.stringify({
-          nome: name,
-          valor_centavos: amountCents,
-          status: "pendente",
-          provedor: "pixblack",
-          pagamento_id: localReference
-        })
-      }
-    );
-
-    if (!insertResponse.ok) {
-      console.error(
-        "Supabase insert failed",
-        insertResponse.status,
-        await insertResponse.text().catch(() => "")
-      );
-
-      return res.status(502).json({
-        erro: "Não foi possível registrar a contribuição. Tente novamente."
-      });
-    }
-
-    // Criação da cobrança na Pix Black
+    const externalId = `thor_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const payload = {
-      amount_cents: amountCents,
-      description: "Doação para o Thor",
-      external_reference: localReference,
-      payer: {
-        name,
-        document: documentNumber
-      }
+      amount: valor,
+      description: nome ? `Doação para o Thor - ${nome}` : "Doação para o Thor",
+      external_id: externalId,
+      expiration: 1800
     };
 
-    const {
-      response: gatewayResponse,
-      data
-    } = await createCharge(
-      apiKey,
-      localReference,
-      payload
-    );
-
+    const gatewayResponse = await fetch("https://nexuspag.com/api/pix/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": apiKey },
+      body: JSON.stringify(payload)
+    });
+    const data = await gatewayResponse.json().catch(() => ({}));
     if (!gatewayResponse.ok) {
-      await updateDonation(
-        localReference,
-        { status: "cancelado" }
-      ).catch(() => {});
-
-      console.error(
-        "Pix Black create charge failed",
-        gatewayResponse.status,
-        data?.message || ""
-      );
-
-      const gatewayMessage =
-        typeof data?.message === "string"
-          ? data.message
-          : "";
-
-      if (/cpf|cnpj|documento/i.test(gatewayMessage)) {
-        return res.status(400).json({
-          erro: "A Pix Black recusou o documento informado. Confira os números e tente novamente."
-        });
-      }
-
-      if (gatewayResponse.status === 401) {
-        return res.status(502).json({
-          erro: "Não foi possível autenticar a cobrança na Pix Black. Verifique a configuração do serviço."
-        });
-      }
-
-      if (gatewayResponse.status === 403) {
-        return res.status(502).json({
-          erro: "A conta Pix Black não está autorizada a criar cobranças no momento."
-        });
-      }
-
-      return res.status(502).json({
-        erro: "A Pix Black não conseguiu gerar o PIX agora. Tente novamente."
-      });
+      console.error("NexusPag create PIX failed", gatewayResponse.status);
+      return res.status(502).json({ erro: "O provedor não conseguiu gerar o PIX. Tente novamente." });
     }
 
-    const chargeId =
-      typeof data?.id === "string" ? data.id : "";
-
-    const copyPaste =
-      typeof data?.pix?.copy_paste === "string"
-        ? data.pix.copy_paste
-        : "";
-
-    if (
-      !chargeId ||
-      !copyPaste ||
-      Number(data.amount_cents) !== amountCents ||
-      data.status !== "pending"
-    ) {
-      await updateDonation(
-        localReference,
-        { status: "cancelado" }
-      ).catch(() => {});
-
-      console.error(
-        "Pix Black returned an unexpected charge response"
-      );
-
-      return res.status(502).json({
-        erro: "A Pix Black retornou dados de cobrança incompletos."
-      });
+    const transaction = data?.transaction || data?.data?.transaction || data?.data || {};
+    const pix = transaction.pix_copia_cola || transaction.copy_paste || transaction.pix;
+    let qr = transaction.qr_code_base64 || transaction.qr_code || transaction.qr;
+    if (typeof qr === "string" && qr.startsWith("data:image/")) qr = qr.split(",")[1];
+    if (!pix && !qr) {
+      console.error("NexusPag response did not include expected PIX fields");
+      return res.status(502).json({ erro: "O provedor não retornou os dados do PIX esperados." });
     }
 
-    // Atualiza a referência local com o ID da cobrança
-    const linkResponse = await updateDonation(
-      localReference,
-      { pagamento_id: chargeId }
-    );
-
-    if (!linkResponse.ok) {
-      console.error(
-        "Could not replace local reference with Pix Black charge id",
-        linkResponse.status
-      );
-    }
-
-    // Gera QR Code
-    const qrDataUrl = await QRCode.toDataURL(
-      copyPaste,
-      {
-        errorCorrectionLevel: "M",
-        margin: 2,
-        width: 320
-      }
-    );
-
+    // O total arrecadado não é alterado aqui: só deve mudar após confirmação autenticada do pagamento.
+    // O banco de dados/webhook é uma etapa de configuração separada, documentada no README.
     return res.status(200).json({
-      pix: copyPaste,
-      qr: qrDataUrl,
-      id: chargeId,
-      external_reference: localReference,
-      status: data.status,
-      expires_at: data.pix.expires_at || null
+      pix: typeof pix === "string" ? pix : "",
+      qr: typeof qr === "string" ? qr : "",
+      id: transaction.id || transaction.transaction_id || externalId,
+      external_id: externalId,
+      status: transaction.status || "pending"
     });
-
   } catch (error) {
-    if (localReference) {
-      await updateDonation(
-        localReference,
-        { status: "cancelado" }
-      ).catch(() => {});
-    }
-
-    console.error(
-      "PIX creation error",
-      error?.message || error
-    );
-
-    return res.status(500).json({
-      erro: "Erro interno ao gerar o PIX."
-    });
+    console.error("PIX creation error", error?.message || error);
+    return res.status(500).json({ erro: "Erro interno ao gerar o PIX." });
   }
 }
