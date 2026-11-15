@@ -3,9 +3,10 @@ import { randomUUID } from "node:crypto";
 function parseAmount(value) {
   if (typeof value === "number") return Number.isFinite(value) ? Math.round(value * 100) / 100 : NaN;
   if (typeof value !== "string") return NaN;
-  const cleaned = value.trim().replace(/\\s/g, "").replace(/^R\\$/i, "");
+  let cleaned = value.trim().replaceAll(" ", "");
+  if (cleaned.slice(0, 2).toLowerCase() === "r$") cleaned = cleaned.slice(2);
   if (!cleaned) return NaN;
-  const normalized = cleaned.includes(",") ? cleaned.replace(/\\./g, "").replace(",", ".") : cleaned;
+  const normalized = cleaned.includes(",") ? cleaned.split(".").join("").replace(",", ".") : cleaned;
   const amount = Number(normalized);
   return Number.isFinite(amount) ? Math.round(amount * 100) / 100 : NaN;
 }
@@ -49,7 +50,7 @@ export default async function handler(req, res) {
     if (amount > 1000000) return res.status(400).json({ erro: "O valor informado é muito alto." });
 
     const amountCents = Math.round(amount * 100);
-    externalId = `thor_${Date.now()}_${randomUUID().replace(/-/g, "").slice(0, 16)}`;
+    externalId = `thor_${Date.now()}_${randomUUID().replaceAll("-", "").slice(0, 16)}`;
     const insert = await fetch(`${process.env.SUPABASE_URL}/rest/v1/doacoes`, {
       method: "POST",
       headers: supabaseHeaders({ Prefer: "return=minimal" }),
@@ -66,7 +67,8 @@ export default async function handler(req, res) {
       return res.status(502).json({ erro: "Não foi possível registrar sua contribuição. Tente novamente." });
     }
 
-    const baseUrl = (process.env.APP_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "")).replace(/\\/$/, "");
+    let baseUrl = process.env.APP_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
+    if (baseUrl.endsWith("/")) baseUrl = baseUrl.slice(0, -1);
     if (!baseUrl) {
       await updateDonation(externalId, { status: "cancelado" }).catch(() => {});
       return res.status(500).json({ erro: "Configure APP_BASE_URL nas variáveis do Vercel." });
