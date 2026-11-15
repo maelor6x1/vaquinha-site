@@ -4,9 +4,9 @@ import QRCode from "qrcode";
 function parseAmount(value) {
   if (typeof value === "number") return Number.isFinite(value) ? Math.round(value * 100) / 100 : NaN;
   if (typeof value !== "string") return NaN;
-  const cleaned = value.trim().replace(/\\s/g, "").replace(/^R\\$/i, "");
+  const cleaned = value.trim().replace(/\s/g, "").replace(/^R\$/i, "");
   if (!cleaned) return NaN;
-  const normalized = cleaned.includes(",") ? cleaned.replace(/\\./g, "").replace(",", ".") : cleaned;
+  const normalized = cleaned.includes(",") ? cleaned.replace(/\./g, "").replace(",", ".") : cleaned;
   const amount = Number(normalized);
   return Number.isFinite(amount) ? Math.round(amount * 100) / 100 : NaN;
 }
@@ -33,7 +33,7 @@ export default async function handler(req, res) {
   }
 
   const apiKey = process.env.PIXBLACK_API_KEY;
-  const defaultDocument = String(process.env.PIXBLACK_DEFAULT_PAYER_DOCUMENT || "").replace(/\\D/g, "");
+  const defaultDocument = String(process.env.PIXBLACK_DEFAULT_PAYER_DOCUMENT || "").replace(/\D/g, "");
   if (!apiKey) return res.status(500).json({ erro: "A chave da Pix Black ainda não está configurada no servidor." });
   if (![11, 14].includes(defaultDocument.length)) {
     return res.status(500).json({ erro: "Configure o CPF/CNPJ padrão autorizado pela Pix Black nas variáveis do servidor." });
