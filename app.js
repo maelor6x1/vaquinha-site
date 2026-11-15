@@ -197,7 +197,7 @@ amountInput.addEventListener("input", () => {
 });
 amountInput.addEventListener("blur", () => {
   const amount = parseAmount(amountInput.value);
-  if (Number.isFinite(amount) && amount >= 1) amountInput.value = formatInput(amount);
+  if (Number.isFinite(amount) && amount >= 5) amountInput.value = formatInput(amount);
 });
 
 donationForm.addEventListener("submit", async (event) => {
@@ -205,8 +205,8 @@ donationForm.addEventListener("submit", async (event) => {
   const amount = parseAmount(amountInput.value);
   const name = $("donorName").value.trim();
 
-  if (!Number.isFinite(amount) || amount < 1) {
-    showToast("O valor mínimo para doar é R$ 1,00.");
+  if (!Number.isFinite(amount) || amount < 5) {
+    showToast("O valor mínimo para doar é R$ 5,00.");
     amountInput.focus();
     return;
   }
