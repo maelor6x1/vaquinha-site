@@ -205,6 +205,17 @@ donationForm.addEventListener("submit", async (event) => {
   const amount = parseAmount(amountInput.value);
   const name = $("donorName").value.trim();
 
+  if (name.length < 2) {
+    showToast("Informe seu nome completo para continuar.");
+    $("donorName").focus();
+    return;
+  }
+  if (name.length > 100) {
+    showToast("O nome deve ter no máximo 100 caracteres.");
+    $("donorName").focus();
+    return;
+  }
+
   if (!Number.isFinite(amount) || amount < 5) {
     showToast("O valor mínimo para doar é R$ 5,00.");
     amountInput.focus();
