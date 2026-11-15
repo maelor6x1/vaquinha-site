@@ -62,7 +62,6 @@ function updateProgress(raised = 0, supporters = 0) {
   $("raisedAmount").textContent = money(raised);
   $("progressBar").style.width = `${percent}%`;
   $("progressPercent").textContent = `${percent.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`;
-  $("remainingText").textContent = raised >= GOAL ? "Meta alcançada!" : "Cada ajuda faz diferença";
   $("supporterCount").textContent = supporters.toLocaleString("pt-BR");
   const remaining = Math.max(GOAL - raised, 0);
   $("remainingText").textContent = raised >= GOAL ? "Meta mensal alcançada! Obrigado!" : `Faltam ${money(remaining)} para a meta deste mês`;
@@ -106,8 +105,8 @@ async function loadCampaignSummary() {
 }
 async function shareCampaign() {
   const shareData = {
-    title: "Ajude o Thor a vencer o câncer",
-    text: "Ajude o Thor a custear o tratamento e a cirurgia contra o câncer. Qualquer contribuição ou compartilhamento faz diferença. ❤️",
+    title: "Vaquinha do Thor — juntos pelo tratamento",
+    text: "Ajude o Thor a continuar o tratamento contra o câncer. Qualquer contribuição ou compartilhamento faz diferença. ❤️",
     url: window.location.origin + window.location.pathname
   };
   try {
