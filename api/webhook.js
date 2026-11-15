@@ -33,7 +33,7 @@ function verifyNexusSignature(signature, rawBody) {
 }
 
 async function findDonation(externalId) {
-  const query = `${process.env.SUPABASE_URL}/rest/v1/doacoes?pagamento_id=eq.${encodeURIComponent(externalId)}&select=id,valor_centavos,status`;
+  const query = `${process.env.SUPABASE_URL}/rest/v1/doacoes?pagamento_id=eq.${encodeURIComponent(externalId)}&provedor=eq.nexuspag&select=id,valor_centavos,status`;
   const response = await fetch(query, { headers: supabaseHeaders() });
   if (!response.ok) throw new Error(`Supabase lookup failed: ${response.status}`);
   const rows = await response.json();
