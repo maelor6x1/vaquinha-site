@@ -1,6 +1,4 @@
-const INITIAL_RAISED = 467.51;
-const GOAL = 30000;
-const INITIAL_SUPPORTERS = 137;
+const GOAL = 1000;
 const $ = (id) => document.getElementById(id);
 const campaignScreen = $("campaignScreen");
 const donationScreen = $("donationScreen");
@@ -59,13 +57,15 @@ function chooseAmount(amount) {
     button.setAttribute("aria-pressed", String(active));
   });
 }
-function updateProgress(raised = INITIAL_RAISED, supporters = INITIAL_SUPPORTERS) {
+function updateProgress(raised = 0, supporters = 0) {
   const percent = Math.min((raised / GOAL) * 100, 100);
   $("raisedAmount").textContent = money(raised);
   $("progressBar").style.width = `${percent}%`;
   $("progressPercent").textContent = `${percent.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`;
   $("remainingText").textContent = raised >= GOAL ? "Meta alcançada!" : "Cada ajuda faz diferença";
   $("supporterCount").textContent = supporters.toLocaleString("pt-BR");
+  const remaining = Math.max(GOAL - raised, 0);
+  $("remainingText").textContent = raised >= GOAL ? "Meta mensal alcançada! Obrigado!" : `Faltam ${money(remaining)} para a meta deste mês`;
 }
 
 async function loadCampaignSummary() {
@@ -76,9 +76,12 @@ async function loadCampaignSummary() {
     if (Number.isFinite(summary.arrecadado_centavos) && Number.isFinite(summary.apoiadores)) {
       updateProgress(summary.arrecadado_centavos / 100, summary.apoiadores);
     }
+    if (summary.meta_centavos === 100000) $("goalAmount").textContent = money(summary.meta_centavos / 100);
+    if (summary.mes_referencia) $("monthLabel").textContent = summary.mes_referencia;
+    const list = $("supportersList");
+    list.replaceChildren();
     if (Array.isArray(summary.doacoes) && summary.doacoes.length) {
-      const list = $("supportersList");
-      summary.doacoes.slice(0, 10).reverse().forEach((donation) => {
+      summary.doacoes.slice(0, 10).forEach((donation) => {
         const li = document.createElement("li");
         const avatar = document.createElement("span");
         avatar.className = "supporter-avatar";
@@ -89,8 +92,13 @@ async function loadCampaignSummary() {
         const amount = document.createElement("strong");
         amount.textContent = money(Number(donation.valor_centavos || 0) / 100);
         li.append(avatar, name, amount);
-        list.prepend(li);
+        list.appendChild(li);
       });
+    } else {
+      const empty = document.createElement("li");
+      empty.className = "empty-supporters";
+      empty.textContent = "Ainda não há contribuições confirmadas neste mês. Seja a primeira pessoa a ajudar!";
+      list.appendChild(empty);
     }
   } catch (error) {
     console.warn("Não foi possível atualizar o resumo da campanha.");
@@ -197,7 +205,7 @@ amountInput.addEventListener("input", () => {
 });
 amountInput.addEventListener("blur", () => {
   const amount = parseAmount(amountInput.value);
-  if (Number.isFinite(amount) && amount >= 5) amountInput.value = formatInput(amount);
+  if (Number.isFinite(amount) && amount >= 1) amountInput.value = formatInput(amount);
 });
 
 donationForm.addEventListener("submit", async (event) => {
@@ -216,8 +224,8 @@ donationForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  if (!Number.isFinite(amount) || amount < 5) {
-    showToast("O valor mínimo para doar é R$ 5,00.");
+  if (!Number.isFinite(amount) || amount < 1) {
+    showToast("O valor mínimo para doar é R$ 1,00.");
     amountInput.focus();
     return;
   }
