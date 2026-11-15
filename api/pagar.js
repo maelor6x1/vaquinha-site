@@ -45,7 +45,10 @@ export default async function handler(req, res) {
   let externalReference = "";
   try {
     const amount = parseAmount(req.body?.valor);
-    const name = typeof req.body?.nome === "string" ? req.body.nome.trim().slice(0, 100) : "";
+    const name = typeof req.body?.nome === "string" ? req.body.nome.trim() : "";
+    if (name.length < 2 || name.length > 100) {
+      return res.status(400).json({ erro: "Informe seu nome completo (de 2 a 100 caracteres)." });
+    }
     if (!Number.isFinite(amount) || amount < 5) {
       return res.status(400).json({ erro: "O valor mínimo para doar é R$ 5,00." });
     }
@@ -58,7 +61,7 @@ export default async function handler(req, res) {
       method: "POST",
       headers: supabaseHeaders({ Prefer: "return=minimal" }),
       body: JSON.stringify({
-        nome: name || null,
+        nome: name,
         valor_centavos: amountCents,
         status: "pendente",
         provedor: "pixblack",
@@ -77,7 +80,7 @@ export default async function handler(req, res) {
       external_reference: externalReference,
       payer: { document: defaultDocument }
     };
-    if (name) payload.payer.name = name;
+    payload.payer.name = name;
 
     const gatewayResponse = await fetch("https://pixxblack.com/api/v1/charges", {
       method: "POST",
