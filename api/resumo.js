@@ -40,7 +40,7 @@ export default async function handler(req, res) {
 
   try {
     const window = monthWindow();
-    const filters = `status=eq.pago&pago_em=gte.${encodeURIComponent(window.start)}&pago_em=lt.${encodeURIComponent(window.nextStart)}`;
+    const filters = `status=eq.pago&provedor=eq.nexuspag&pago_em=gte.${encodeURIComponent(window.start)}&pago_em=lt.${encodeURIComponent(window.nextStart)}`;
     const url = `${process.env.SUPABASE_URL}/rest/v1/doacoes?${filters}&select=nome,valor_centavos,pago_em&order=pago_em.desc&limit=1000`;
     const response = await fetch(url, { headers: supabaseHeaders() });
     if (!response.ok) throw new Error(`Supabase monthly summary failed: ${response.status}`);
