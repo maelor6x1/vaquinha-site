@@ -18,7 +18,7 @@ Variáveis necessárias no Vercel:
 - `SUPABASE_URL`: URL do projeto Supabase.
 - `SUPABASE_SECRET_KEY`: chave secreta do Supabase, somente no servidor.
 
-Webhook: `https://vaquinha-site.vercel.app/api/webhook`. O handler mantém compatibilidade com notificações PixBlack antigas que eventualmente ainda estejam pendentes, mas a criação de novas cobranças PixBlack foi removida do fluxo da vaquinha. Não remova as variáveis antigas até verificar que não existem cobranças PixBlack pendentes; a NovaPay deve manter suas próprias credenciais separadas.
+Webhook: `https://vaquinha-site.vercel.app/api/webhook`. A integração da vaquinha utiliza somente a NexusPag. As variáveis e os endpoints PixBlack não fazem parte do fluxo do site; mantenha as credenciais da PixBlack exclusivamente no projeto NovaPay. Cobranças PixBlack antigas que ainda estejam pendentes não serão confirmadas por este webhook.
 
 ## Transparência sobre o tratamento
 O texto público descreve somente o que foi informado: o Thor foi diagnosticado com câncer e precisa de tratamento e cirurgia. Não foram incluídos tipo, estágio, prognóstico, laudo ou custos específicos porque esses dados precisam vir de documentação veterinária confirmada.
