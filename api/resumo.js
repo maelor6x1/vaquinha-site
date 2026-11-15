@@ -20,7 +20,7 @@ function monthParts(date) {
 function monthWindow(now = new Date()) {
   const { year, month } = monthParts(now);
   const monthStart = `${year}-${String(month).padStart(2, "0")}-01T00:00:00-03:00`;
-  const nextMonthDate = new Date(Date.UTC(year, month, 1));
+  const nextMonthDate = new Date(Date.UTC(year, month, 2));
   const nextParts = monthParts(nextMonthDate);
   const nextStart = `${nextParts.year}-${String(nextParts.month).padStart(2, "0")}-01T00:00:00-03:00`;
   const start = new Date(CAMPAIGN_START) > new Date(monthStart) ? CAMPAIGN_START : monthStart;
