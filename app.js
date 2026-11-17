@@ -302,10 +302,20 @@ function renderPayment(data, amount) {
     warning.textContent = "O provedor não retornou o código PIX esperado. Nenhum valor foi somado à arrecadação.";
     panel.appendChild(warning);
   }
+  const verify = document.createElement("button");
+  verify.type = "button";
+  verify.className = "button button-secondary";
+  verify.textContent = "Já paguei — verificar pagamento";
+  verify.addEventListener("click", async () => {
+    verify.disabled = true;
+    verify.textContent = "Verificando pagamento…";
+    await recoverPendingPayment();
+  });
+
   const reminder = document.createElement("p");
   reminder.className = "field-hint";
   reminder.textContent = "A arrecadação só deve ser atualizada depois que o pagamento for confirmado.";
-  panel.appendChild(reminder);
+  panel.append(verify, reminder);
   paymentResult.appendChild(panel);
 }
 $("contributeButton").addEventListener("click", showDonation);
