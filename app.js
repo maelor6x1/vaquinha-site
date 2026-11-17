@@ -11,6 +11,7 @@ let unresolvedPayment = false;
 let paymentReady = false;
 let toastTimer;
 const PENDING_PAYMENT_KEY = "thor_pending_external_id";
+const PENDING_PAYMENT_AMOUNT_KEY = "thor_pending_amount";
 
 function money(value) {
   return Number(value).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -160,6 +161,10 @@ async function recoverPendingPayment() {
   let externalId = "";
   try {
     externalId = localStorage.getItem(PENDING_PAYMENT_KEY) || "";
+    const savedAmount = Number(localStorage.getItem(PENDING_PAYMENT_AMOUNT_KEY));
+    if (externalId && Number.isFinite(savedAmount) && savedAmount >= 1) {
+      amountInput.value = formatInput(savedAmount);
+    }
   } catch {
     return;
   }
@@ -192,6 +197,7 @@ async function recoverPendingPayment() {
       unresolvedPayment = false;
       paymentReady = true;
       localStorage.removeItem(PENDING_PAYMENT_KEY);
+      localStorage.removeItem(PENDING_PAYMENT_AMOUNT_KEY);
       paymentResult.replaceChildren();
       const confirmed = document.createElement("p");
       confirmed.className = "success-message";
@@ -212,6 +218,7 @@ async function recoverPendingPayment() {
     }
     if (data.status === "expired" || data.status === "cancelled" || data.status === "cancelado") {
       localStorage.removeItem(PENDING_PAYMENT_KEY);
+      localStorage.removeItem(PENDING_PAYMENT_AMOUNT_KEY);
       unresolvedPayment = false;
       paymentReady = false;
       paymentResult.replaceChildren();
@@ -221,6 +228,17 @@ async function recoverPendingPayment() {
       paymentResult.appendChild(expired);
       generatePixButton.disabled = false;
       generatePixButton.innerHTML = 'Gerar PIX <span aria-hidden="true">→</span>';
+      return;
+    }
+    if (data.status === "not_found") {
+      unresolvedPayment = false;
+      paymentReady = false;
+      const retry = document.createElement("p");
+      retry.className = "field-hint";
+      retry.textContent = "Não encontramos uma cobrança criada para esta solicitação. Você pode tentar novamente; usaremos o mesmo identificador para evitar duplicidade.";
+      paymentResult.replaceChildren(retry);
+      generatePixButton.disabled = false;
+      generatePixButton.textContent = "Tentar novamente";
       return;
     }
     unresolvedPayment = true;
@@ -340,12 +358,20 @@ donationForm.addEventListener("submit", async (event) => {
   let externalId;
   try {
     externalId = localStorage.getItem(PENDING_PAYMENT_KEY) || "";
-    if (!externalId) {
+    const savedAmount = Number(localStorage.getItem(PENDING_PAYMENT_AMOUNT_KEY));
+    if (externalId && Number.isFinite(savedAmount) && savedAmount >= 1) {
+      if (Math.round(savedAmount * 100) !== Math.round(amount * 100)) {
+        amountInput.value = formatInput(savedAmount);
+        showToast("Já existe uma solicitação em recuperação. Mantivemos o valor original para evitar cobrança duplicada.");
+        return;
+      }
+    } else {
       const randomPart = typeof crypto.randomUUID === "function"
         ? crypto.randomUUID().replaceAll("-", "")
         : Math.random().toString(36).slice(2) + Date.now().toString(36);
       externalId = `thor_${Date.now()}_${randomPart.slice(0, 24)}`;
       localStorage.setItem(PENDING_PAYMENT_KEY, externalId);
+      localStorage.setItem(PENDING_PAYMENT_AMOUNT_KEY, amount.toFixed(2));
     }
   } catch {
     showToast("Não foi possível salvar a solicitação neste navegador. Tente novamente.");
