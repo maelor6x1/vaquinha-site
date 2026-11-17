@@ -111,6 +111,13 @@ export default async function handler(req, res) {
     return res.status(401).json({ erro: "Assinatura NexusPag inválida." });
   }
 
+  // A NexusPag documenta esse header como obrigatório. Conferimos o header
+  // com o corpo para impedir que um evento de outro tipo siga pelo fluxo de PIX.
+  const headerEvent = req.headers["x-webhook-event"];
+  if (typeof headerEvent !== "string" || headerEvent !== event.event) {
+    return res.status(400).json({ erro: "Tipo de evento NexusPag inválido." });
+  }
+
   if (event.event !== "payment.confirmed" || event.status !== "paid") {
     return res.status(200).json({ recebido: true, ignorado: true });
   }
