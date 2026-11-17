@@ -17,11 +17,32 @@ function supabaseHeaders(extra = {}) {
 }
 
 async function updateDonation(externalId, fields) {
-  return fetch(`${process.env.SUPABASE_URL}/rest/v1/doacoes?pagamento_id=eq.${encodeURIComponent(externalId)}`, {
+  const response = await fetch(`${process.env.SUPABASE_URL}/rest/v1/doacoes?pagamento_id=eq.${encodeURIComponent(externalId)}&status=eq.pendente`, {
     method: "PATCH",
     headers: supabaseHeaders({ Prefer: "return=minimal" }),
     body: JSON.stringify(fields)
   });
+  if (!response.ok) {
+    throw new Error(`Supabase donation update failed: ${response.status}`);
+  }
+}
+
+function getTransaction(data) {
+  return data?.transaction || data?.data?.transaction || data?.data || {};
+}
+
+function getPixDetails(transaction) {
+  const pix = transaction.pix_copia_cola || transaction.copy_paste || transaction.pix || "";
+  let qr = transaction.qr_code_base64 || transaction.qr_code_image || transaction.qr || "";
+
+  if (typeof qr === "string" && qr.startsWith("data:image/")) {
+    qr = qr.split(",")[1] || "";
+  }
+
+  return {
+    pix: typeof pix === "string" ? pix : "",
+    qr: typeof qr === "string" ? qr : ""
+  };
 }
 
 export default async function handler(req, res) {
@@ -38,10 +59,13 @@ export default async function handler(req, res) {
   }
 
   let externalId = "";
+  let gatewayAttempted = false;
+
   try {
     const amount = parseAmount(req.body?.valor);
     const name = typeof req.body?.nome === "string" ? req.body.nome.trim() : "";
     const message = typeof req.body?.mensagem === "string" ? req.body.mensagem.trim() : "";
+
     if (name.length > 100) return res.status(400).json({ erro: "O nome deve ter no máximo 100 caracteres." });
     if (message.length > 300) return res.status(400).json({ erro: "A mensagem deve ter no máximo 300 caracteres." });
     if (!Number.isFinite(amount) || amount < 1) {
@@ -51,6 +75,7 @@ export default async function handler(req, res) {
 
     const amountCents = Math.round(amount * 100);
     externalId = `thor_${Date.now()}_${randomUUID().replaceAll("-", "").slice(0, 16)}`;
+
     const insert = await fetch(`${process.env.SUPABASE_URL}/rest/v1/doacoes`, {
       method: "POST",
       headers: supabaseHeaders({ Prefer: "return=minimal" }),
@@ -63,6 +88,7 @@ export default async function handler(req, res) {
         pagamento_id: externalId
       })
     });
+
     if (!insert.ok) {
       console.error("Supabase donation insert failed", insert.status, await insert.text().catch(() => ""));
       return res.status(502).json({ erro: "Não foi possível registrar sua contribuição. Tente novamente." });
@@ -71,10 +97,13 @@ export default async function handler(req, res) {
     let baseUrl = process.env.APP_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
     if (baseUrl.endsWith("/")) baseUrl = baseUrl.slice(0, -1);
     if (!baseUrl) {
-      await updateDonation(externalId, { status: "cancelado" }).catch(() => {});
+      await updateDonation(externalId, { status: "cancelado" }).catch((error) => {
+        console.error("Could not cancel donation without app URL", error?.message || error);
+      });
       return res.status(500).json({ erro: "Configure APP_BASE_URL nas variáveis do Vercel." });
     }
 
+    gatewayAttempted = true;
     const gatewayResponse = await fetch("https://nexuspag.com/api/pix/create", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": apiKey },
@@ -86,33 +115,46 @@ export default async function handler(req, res) {
         expiration: 1800
       })
     });
+
     const data = await gatewayResponse.json().catch(() => ({}));
     if (!gatewayResponse.ok) {
-      await updateDonation(externalId, { status: "cancelado" }).catch(() => {});
-      console.error("NexusPag create PIX failed", gatewayResponse.status);
-      return res.status(502).json({ erro: "A NexusPag não conseguiu gerar o PIX. Tente novamente." });
+      console.error("NexusPag create PIX returned an error", gatewayResponse.status);
+      return res.status(502).json({
+        erro: "Não foi possível confirmar a criação do PIX. Evite tentar novamente imediatamente; a confirmação pode chegar pelo sistema de pagamento."
+      });
     }
 
-    const transaction = data?.transaction || data?.data?.transaction || data?.data || {};
-    const pix = transaction.pix_copia_cola || transaction.copy_paste || transaction.pix || transaction.qr_code;
-    let qr = transaction.qr_code_base64 || transaction.qr_code_image || transaction.qr;
-    if (typeof qr === "string" && qr.startsWith("data:image/")) qr = qr.split(",")[1];
+    const transaction = getTransaction(data);
+    const { pix, qr } = getPixDetails(transaction);
+
     if (!pix && !qr) {
-      await updateDonation(externalId, { status: "cancelado" }).catch(() => {});
       console.error("NexusPag response did not include expected PIX fields");
-      return res.status(502).json({ erro: "A NexusPag não retornou os dados do PIX esperados." });
+      return res.status(502).json({
+        erro: "A NexusPag não retornou os dados do PIX esperados. A solicitação ficará em análise para evitar duplicidade."
+      });
     }
 
     return res.status(200).json({
-      pix: typeof pix === "string" ? pix : "",
-      qr: typeof qr === "string" ? qr : "",
+      pix,
+      qr,
       id: transaction.id || transaction.transaction_id || externalId,
       external_id: externalId,
       status: transaction.status || "pending"
     });
   } catch (error) {
-    if (externalId) await updateDonation(externalId, { status: "cancelado" }).catch(() => {});
+    // Depois que a requisição foi enviada ao gateway, o resultado pode ser ambíguo:
+    // não cancelar automaticamente, pois a cobrança pode ter sido criada.
+    if (externalId && !gatewayAttempted) {
+      await updateDonation(externalId, { status: "cancelado" }).catch((updateError) => {
+        console.error("Could not cancel donation before gateway request", updateError?.message || updateError);
+      });
+    }
+
     console.error("NexusPag PIX creation error", error?.message || error);
-    return res.status(500).json({ erro: "Erro interno ao gerar o PIX." });
+    return res.status(502).json({
+      erro: gatewayAttempted
+        ? "Não foi possível confirmar a resposta do pagamento. Evite tentar novamente imediatamente para não gerar uma cobrança duplicada."
+        : "Erro interno ao preparar o PIX."
+    });
   }
 }
