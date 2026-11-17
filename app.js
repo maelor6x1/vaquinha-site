@@ -166,6 +166,8 @@ async function recoverPendingPayment() {
   if (!externalId) {
     unresolvedPayment = false;
     paymentReady = false;
+    generatePixButton.disabled = false;
+    generatePixButton.innerHTML = 'Gerar PIX <span aria-hidden="true">→</span>';
     return;
   }
 
@@ -189,6 +191,7 @@ async function recoverPendingPayment() {
     if (data.status === "paid" || data.confirmado === true) {
       unresolvedPayment = false;
       paymentReady = true;
+      localStorage.removeItem(PENDING_PAYMENT_KEY);
       paymentResult.replaceChildren();
       const confirmed = document.createElement("p");
       confirmed.className = "success-message";
@@ -202,7 +205,7 @@ async function recoverPendingPayment() {
     if (data.status === "pending" && (data.pix || data.qr)) {
       unresolvedPayment = false;
       paymentReady = true;
-      renderPayment(data, parseAmount(amountInput.value) || 0);
+      renderPayment(data, Number(data.amount) || parseAmount(amountInput.value) || 0);
       generatePixButton.disabled = true;
       generatePixButton.textContent = "PIX já gerado";
       return;
