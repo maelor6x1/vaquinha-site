@@ -4,7 +4,17 @@ export const config = { api: { bodyParser: false } };
 
 async function readRawBody(req) {
   const chunks = [];
-  for await (const chunk of req) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  let totalBytes = 0;
+  for await (const chunk of req) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    totalBytes += buffer.length;
+    if (totalBytes > 64 * 1024) {
+      const error = new Error("Webhook body too large");
+      error.statusCode = 413;
+      throw error;
+    }
+    chunks.push(buffer);
+  }
   return Buffer.concat(chunks);
 }
 
@@ -105,7 +115,10 @@ export default async function handler(req, res) {
   try {
     rawBody = await readRawBody(req);
     event = JSON.parse(rawBody.toString("utf8"));
-  } catch {
+  } catch (bodyError) {
+    if (bodyError?.statusCode === 413) {
+      return res.status(413).json({ erro: "Corpo do webhook excede o limite permitido." });
+    }
     return res.status(400).json({ erro: "Corpo JSON inválido." });
   }
 
