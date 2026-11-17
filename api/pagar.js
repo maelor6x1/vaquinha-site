@@ -74,11 +74,14 @@ export default async function handler(req, res) {
     if (amount > 1000000) return res.status(400).json({ erro: "O valor informado é muito alto." });
 
     const amountCents = Math.round(amount * 100);
-    externalId = `thor_${Date.now()}_${randomUUID().replaceAll("-", "").slice(0, 16)}`;
+    externalId = typeof req.body?.external_id === "string" ? req.body.external_id : `thor_${Date.now()}_${randomUUID().replaceAll("-", "").slice(0, 16)}`;
+    if (!/^thor_[a-zA-Z0-9_-]{10,100}$/.test(externalId)) {
+      return res.status(400).json({ erro: "Identificador de solicitação inválido." });
+    }
 
     const insert = await fetch(`${process.env.SUPABASE_URL}/rest/v1/doacoes`, {
       method: "POST",
-      headers: supabaseHeaders({ Prefer: "return=minimal" }),
+      headers: supabaseHeaders({ Prefer: "resolution=ignore-duplicates,return=minimal" }),
       body: JSON.stringify({
         nome: name || "Apoiador anônimo",
         mensagem: message || null,
@@ -92,6 +95,22 @@ export default async function handler(req, res) {
     if (!insert.ok) {
       console.error("Supabase donation insert failed", insert.status, await insert.text().catch(() => ""));
       return res.status(502).json({ erro: "Não foi possível registrar sua contribuição. Tente novamente." });
+    }
+
+    const existingResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/doacoes?pagamento_id=eq.${encodeURIComponent(externalId)}&provedor=eq.nexuspag&select=valor_centavos,status&limit=1`, {
+      headers: supabaseHeaders()
+    });
+    if (!existingResponse.ok) throw new Error(`Supabase idempotency lookup failed: ${existingResponse.status}`);
+    const existingRows = await existingResponse.json();
+    const existing = existingRows[0];
+    if (!existing || Number(existing.valor_centavos) !== amountCents) {
+      return res.status(409).json({ erro: "Não foi possível validar a solicitação anterior." });
+    }
+    if (existing.status === "pago") {
+      return res.status(409).json({ erro: "Esta contribuição já foi paga.", external_id: externalId });
+    }
+    if (existing.status !== "pendente") {
+      return res.status(409).json({ erro: "Esta solicitação não está mais disponível. Entre em contato antes de gerar outra.", external_id: externalId });
     }
 
     let baseUrl = process.env.APP_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
@@ -121,7 +140,8 @@ export default async function handler(req, res) {
       console.error("NexusPag create PIX returned an error", gatewayResponse.status);
       return res.status(502).json({
         erro: "Não foi possível confirmar a criação do PIX. Evite tentar novamente imediatamente; a confirmação pode chegar pelo sistema de pagamento.",
-        resultado_indefinido: true
+        resultado_indefinido: true,
+        external_id: externalId
       });
     }
 
@@ -132,7 +152,8 @@ export default async function handler(req, res) {
       console.error("NexusPag response did not include expected PIX fields");
       return res.status(502).json({
         erro: "A NexusPag não retornou os dados do PIX esperados. A solicitação ficará em análise para evitar duplicidade.",
-        resultado_indefinido: true
+        resultado_indefinido: true,
+        external_id: externalId
       });
     }
 
@@ -157,7 +178,8 @@ export default async function handler(req, res) {
       erro: gatewayAttempted
         ? "Não foi possível confirmar a resposta do pagamento. Evite tentar novamente imediatamente para não gerar uma cobrança duplicada."
         : "Erro interno ao preparar o PIX.",
-      resultado_indefinido: gatewayAttempted
+      resultado_indefinido: gatewayAttempted,
+      ...(gatewayAttempted && externalId ? { external_id: externalId } : {})
     });
   }
 }
