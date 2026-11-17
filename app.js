@@ -167,7 +167,13 @@ function renderPayment(data, amount) {
     const img = document.createElement("img");
     img.className = "pix-qr";
     img.alt = "QR Code para pagamento PIX";
-    img.src = data.qr.startsWith("data:") ? data.qr : `data:image/png;base64,${data.qr}`;
+    if (data.qr.startsWith("data:image/")) {
+      img.src = data.qr;
+    } else if (/^https?:\/\//i.test(data.qr)) {
+      img.src = data.qr;
+    } else {
+      img.src = `data:image/png;base64,${data.qr}`;
+    }
     panel.appendChild(img);
   }
 
