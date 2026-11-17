@@ -1,3 +1,5 @@
+import { isRateLimited } from "../rate-limit.js";
+
 function supabaseHeaders(extra = {}) {
   const key = process.env.SUPABASE_SECRET_KEY;
   return { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json", ...extra };
@@ -30,6 +32,16 @@ export default async function handler(req, res) {
   }
 
   try {
+    if (await isRateLimited(req, "consultar", 60, 600)) {
+      res.setHeader("Retry-After", "600");
+      return res.status(429).json({ erro: "Muitas consultas em pouco tempo. Aguarde alguns minutos." });
+    }
+  } catch (rateLimitError) {
+    console.error("Payment lookup rate limiter unavailable", rateLimitError?.message || rateLimitError);
+    return res.status(503).json({ erro: "A consulta está temporariamente indisponível." });
+  }
+
+  try {
     const lookupUrl = `${supabaseUrl}/rest/v1/doacoes?pagamento_id=eq.${encodeURIComponent(externalId)}&provedor=eq.nexuspag&select=id,valor_centavos,status&limit=1`;
     const lookup = await fetch(lookupUrl, { headers: supabaseHeaders() });
     if (!lookup.ok) throw new Error(`Supabase lookup failed: ${lookup.status}`);
@@ -40,7 +52,7 @@ export default async function handler(req, res) {
     if (donation.status === "pago") {
       return res.status(200).json({ status: "paid", confirmado: true });
     }
-    if (donation.status !== "pendente") {
+    if (donation.status !== "pendente" && donation.status !== "cancelado") {
       return res.status(200).json({ status: donation.status, confirmado: false });
     }
 
@@ -49,7 +61,7 @@ export default async function handler(req, res) {
       headers: { "x-api-key": apiKey }
     });
     if (gateway.status === 404) {
-      return res.status(200).json({ status: "not_found", confirmado: false });
+      return res.status(200).json({ status: donation.status === "cancelado" ? "cancelado" : "not_found", confirmado: false });
     }
     if (!gateway.ok) {
       console.error("NexusPag PIX lookup failed", gateway.status);
@@ -67,7 +79,7 @@ export default async function handler(req, res) {
 
     if (status === "paid") {
       const paidAt = normalizePaidAt(transaction.paid_at);
-      const updateUrl = `${supabaseUrl}/rest/v1/doacoes?id=eq.${encodeURIComponent(donation.id)}&status=eq.pendente&select=id,status`;
+      const updateUrl = `${supabaseUrl}/rest/v1/doacoes?id=eq.${encodeURIComponent(donation.id)}&status=in.(pendente,cancelado)&select=id,status`;
       const update = await fetch(updateUrl, {
         method: "PATCH",
         headers: supabaseHeaders({ Prefer: "return=representation" }),
