@@ -120,7 +120,8 @@ export default async function handler(req, res) {
     if (!gatewayResponse.ok) {
       console.error("NexusPag create PIX returned an error", gatewayResponse.status);
       return res.status(502).json({
-        erro: "Não foi possível confirmar a criação do PIX. Evite tentar novamente imediatamente; a confirmação pode chegar pelo sistema de pagamento."
+        erro: "Não foi possível confirmar a criação do PIX. Evite tentar novamente imediatamente; a confirmação pode chegar pelo sistema de pagamento.",
+        resultado_indefinido: true
       });
     }
 
@@ -130,7 +131,8 @@ export default async function handler(req, res) {
     if (!pix && !qr) {
       console.error("NexusPag response did not include expected PIX fields");
       return res.status(502).json({
-        erro: "A NexusPag não retornou os dados do PIX esperados. A solicitação ficará em análise para evitar duplicidade."
+        erro: "A NexusPag não retornou os dados do PIX esperados. A solicitação ficará em análise para evitar duplicidade.",
+        resultado_indefinido: true
       });
     }
 
@@ -154,7 +156,8 @@ export default async function handler(req, res) {
     return res.status(502).json({
       erro: gatewayAttempted
         ? "Não foi possível confirmar a resposta do pagamento. Evite tentar novamente imediatamente para não gerar uma cobrança duplicada."
-        : "Erro interno ao preparar o PIX."
+        : "Erro interno ao preparar o PIX.",
+      resultado_indefinido: gatewayAttempted
     });
   }
 }
