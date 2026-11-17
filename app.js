@@ -415,6 +415,10 @@ donationForm.addEventListener("submit", async (event) => {
       error.className = "error-message";
       error.textContent = typeof data.erro === "string" ? data.erro : "Não foi possível gerar o PIX agora. Tente novamente.";
       paymentResult.appendChild(error);
+
+      // Reconcilia o identificador salvo: a solicitação pode ter sido
+      // cancelada antes de chegar ao gateway ou já pode ter sido criada.
+      await recoverPendingPayment();
       return;
     }
     unresolvedPayment = false;
