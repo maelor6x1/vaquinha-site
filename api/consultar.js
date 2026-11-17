@@ -30,7 +30,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const lookupUrl = `${supabaseUrl}/rest/v1/doacoes?pagamento_id=eq.${encodeURIComponent(externalId)}&provedor=eq.nexuspag&select=id,valor_centavos,status,nome,mensagem&limit=1`;
+    const lookupUrl = `${supabaseUrl}/rest/v1/doacoes?pagamento_id=eq.${encodeURIComponent(externalId)}&provedor=eq.nexuspag&select=id,valor_centavos,status&limit=1`;
     const lookup = await fetch(lookupUrl, { headers: supabaseHeaders() });
     if (!lookup.ok) throw new Error(`Supabase lookup failed: ${lookup.status}`);
     const rows = await lookup.json();
