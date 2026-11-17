@@ -34,9 +34,9 @@
           <section class="story">
             <span class="eyebrow">A HISTÓRIA DELE</span>
             <h2>Conheça o Thor</h2>
-            <p>O Thor foi diagnosticado com câncer e agora precisa de acompanhamento veterinário, tratamento e cirurgia. Enfrentar um diagnóstico como esse envolve uma sequência de cuidados e despesas que podem pesar muito para uma família.</p>
-            <p>O câncer acontece quando algumas células passam a se multiplicar de maneira descontrolada. Existem diferentes tipos da doença, com comportamentos e tratamentos distintos. Por isso, cada decisão sobre exames, cirurgia, medicamentos e acompanhamento precisa seguir a avaliação e a orientação do médico-veterinário responsável.</p>
-            <p>Neste momento, a campanha existe para ajudar a viabilizar os cuidados do Thor e dar a ele a oportunidade de seguir o tratamento com o suporte necessário. Cada contribuição, independentemente do valor, ajuda a tornar esse caminho possível.</p>
+            <p>O Thor recebeu um diagnóstico de câncer e precisa de cuidados veterinários para enfrentar essa etapa. Por trás de cada consulta, exame e procedimento existe uma família que está fazendo o possível para oferecer a ele atenção, conforto e a chance de continuar o tratamento.</p>
+            <p>Não existe contribuição pequena quando o objetivo é cuidar de quem faz parte da família. Uma ajuda de R$ 1,00 já participa dessa corrente de solidariedade; várias pequenas contribuições, somadas, podem ajudar a tornar os próximos cuidados possíveis.</p>
+            <p>Esta campanha foi criada para reunir apoio aos custos veterinários do Thor. A necessidade de cada exame, cirurgia, medicamento ou acompanhamento deve ser definida pelo médico-veterinário responsável. Vamos compartilhar a caminhada com transparência e atualizar a arrecadação a cada mês.</p>
             <h3>Como sua contribuição ajuda</h3>
             <ul class="help-list">
               <li>Custos de consultas e acompanhamento veterinário.</li>
@@ -85,19 +85,24 @@
 
       <form id="donationForm" class="donation-card">
         <label class="field-label">Valor da contribuição</label>
-        <div class="amount-grid" role="group" aria-label="Valores sugeridos">
-          <button class="amount-option" type="button" data-amount="1">R$ 1</button>
-          <button class="amount-option selected" type="button" data-amount="10" aria-pressed="true">R$ 10</button>
-          <button class="amount-option" type="button" data-amount="25">R$ 25</button>
-          <button class="amount-option" type="button" data-amount="50">R$ 50</button>
+        <div class="amount-grid amount-grid-rich" role="group" aria-label="Escolha um valor sugerido">
+          <button class="amount-option" type="button" data-amount="10"><strong>R$ 10</strong><small>Ajuda a compor despesas do dia a dia.</small></button>
+          <button class="amount-option" type="button" data-amount="25"><strong>R$ 25</strong><small>Contribui com custos de transporte e cuidados.</small></button>
+          <button class="amount-option selected most-chosen" type="button" data-amount="50" aria-pressed="true"><span class="popular-tag">♥ MAIS ESCOLHIDO</span><strong>R$ 50</strong><small>Ajuda a reunir recursos para exames e consultas.</small></button>
+          <button class="amount-option" type="button" data-amount="100"><strong>R$ 100</strong><small>Ajuda a compor despesas veterinárias maiores.</small></button>
+          <button class="amount-option" type="button" data-amount="200"><strong>R$ 200</strong><small>Um reforço importante para o tratamento.</small></button>
         </div>
-        <label for="amountInput" class="field-label amount-label">Ou digite outro valor</label>
+        <label for="amountInput" class="field-label amount-label">Ou escolha outro valor (mínimo R$ 1,00)</label>
         <div class="currency-input"><span>R$</span><input id="amountInput" name="amount" type="text" inputmode="decimal" autocomplete="off" value="10,00" aria-describedby="minimumHint"></div>
         <p id="minimumHint" class="field-hint">Valor mínimo para doar: R$ 1,00.</p>
 
-        <label for="donorName" class="field-label name-label">Nome completo <span>(obrigatório)</span></label>
-        <input id="donorName" name="name" class="text-input" type="text" maxlength="100" autocomplete="name" placeholder="Digite seu nome completo" required>
-        <p class="field-hint">Usamos seu nome para identificar sua contribuição na campanha.</p>
+        <label for="donorName" class="field-label name-label">Como podemos identificar você? <span>(opcional)</span></label>
+        <input id="donorName" name="name" class="text-input" type="text" maxlength="100" autocomplete="name" placeholder="Você pode contribuir anonimamente">
+        <p class="field-hint">Se preferir, deixe em branco e sua contribuição aparecerá como anônima.</p>
+
+        <label for="donorMessage" class="field-label message-label">Deixe uma mensagem para o Thor <span>(opcional)</span></label>
+        <textarea id="donorMessage" name="message" class="text-input message-input" maxlength="300" rows="3" placeholder="Escreva uma mensagem de carinho ou apoio..."></textarea>
+        <p class="field-hint">Sua mensagem poderá aparecer publicamente junto à contribuição. Até 300 caracteres.</p>
 
         <div class="pix-info"><span class="pix-symbol">₱</span><div><strong>Pagamento via PIX</strong><p>Rápido, simples e sem cadastro.</p></div><span class="pix-check">✓</span></div>
         <button id="generatePixButton" class="button button-primary generate-button" type="submit">Gerar PIX <span aria-hidden="true">→</span></button>
