@@ -1,4 +1,7 @@
 import { randomUUID } from "node:crypto";
+import { isRateLimited } from "../rate-limit.js";
+
+export const config = { api: { bodyParser: { sizeLimit: "16kb" } } };
 
 function parseAmount(value) {
   if (typeof value === "number") return Number.isFinite(value) ? Math.round(value * 100) / 100 : NaN;
@@ -79,6 +82,16 @@ export default async function handler(req, res) {
       return res.status(400).json({ erro: "Identificador de solicitação inválido." });
     }
 
+    try {
+      if (await isRateLimited(req, "pagar", 8, 600)) {
+        res.setHeader("Retry-After", "600");
+        return res.status(429).json({ erro: "Muitas tentativas em pouco tempo. Aguarde alguns minutos antes de gerar outro PIX." });
+      }
+    } catch (rateLimitError) {
+      console.error("Payment rate limiter unavailable", rateLimitError?.message || rateLimitError);
+      return res.status(503).json({ erro: "O serviço está temporariamente indisponível. Tente novamente em instantes." });
+    }
+
     const insert = await fetch(`${process.env.SUPABASE_URL}/rest/v1/doacoes`, {
       method: "POST",
       headers: supabaseHeaders({ Prefer: "resolution=ignore-duplicates,return=minimal" }),
@@ -132,7 +145,8 @@ export default async function handler(req, res) {
         external_id: externalId,
         webhook_url: `${baseUrl}/api/webhook`,
         expiration: 1800
-      })
+      }),
+      signal: AbortSignal.timeout(15000)
     });
 
     const data = await gatewayResponse.json().catch(() => ({}));
