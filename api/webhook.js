@@ -50,9 +50,11 @@ async function findDonation(externalId) {
 async function markDonationPaid(donation, paidAt) {
   if (!donation) return "missing";
   if (donation.status === "pago") return "already_paid";
-  if (donation.status !== "pendente") return "not_pending";
+  // A confirmação real do provedor deve prevalecer sobre um cancelamento
+  // local anterior: webhooks podem chegar atrasados ou ser reenviados.
+  if (donation.status !== "pendente" && donation.status !== "cancelado") return "not_pending";
 
-  const query = `${process.env.SUPABASE_URL}/rest/v1/doacoes?id=eq.${encodeURIComponent(donation.id)}&status=eq.pendente&select=id,status`;
+  const query = `${process.env.SUPABASE_URL}/rest/v1/doacoes?id=eq.${encodeURIComponent(donation.id)}&status=in.(pendente,cancelado)&select=id,status`;
   const response = await fetch(query, {
     method: "PATCH",
     headers: supabaseHeaders({ Prefer: "return=representation" }),
