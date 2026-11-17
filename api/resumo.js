@@ -41,7 +41,7 @@ export default async function handler(req, res) {
   try {
     const window = monthWindow();
     const filters = `status=eq.pago&provedor=eq.nexuspag&pago_em=gte.${encodeURIComponent(window.start)}&pago_em=lt.${encodeURIComponent(window.nextStart)}`;
-    const url = `${process.env.SUPABASE_URL}/rest/v1/doacoes?${filters}&select=nome,valor_centavos,pago_em&order=pago_em.desc&limit=1000`;
+    const url = `${process.env.SUPABASE_URL}/rest/v1/doacoes?${filters}&select=nome,mensagem,valor_centavos,pago_em&order=pago_em.desc&limit=1000`;
     const response = await fetch(url, { headers: supabaseHeaders() });
     if (!response.ok) throw new Error(`Supabase monthly summary failed: ${response.status}`);
     const rows = await response.json();
@@ -53,6 +53,7 @@ export default async function handler(req, res) {
       mes_referencia: window.label,
       doacoes: rows.map((row) => ({
         nome: row.nome || "Apoiador anônimo",
+        mensagem: row.mensagem || "",
         valor_centavos: Number(row.valor_centavos || 0),
         pago_em: row.pago_em
       }))
