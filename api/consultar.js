@@ -84,6 +84,24 @@ export default async function handler(req, res) {
       return res.status(200).json({ status: "paid", confirmado: true });
     }
 
+    if (status === "expired" || status === "cancelled") {
+      const cancelUrl = `${supabaseUrl}/rest/v1/doacoes?id=eq.${encodeURIComponent(donation.id)}&status=eq.pendente&select=id,status`;
+      const cancel = await fetch(cancelUrl, {
+        method: "PATCH",
+        headers: supabaseHeaders({ Prefer: "return=representation" }),
+        body: JSON.stringify({ status: "cancelado" })
+      });
+      if (!cancel.ok) throw new Error(`Supabase cancellation update failed: ${cancel.status}`);
+      const cancelledRows = await cancel.json();
+      if (!Array.isArray(cancelledRows) || cancelledRows.length === 0) {
+        const verify = await fetch(`${supabaseUrl}/rest/v1/doacoes?id=eq.${encodeURIComponent(donation.id)}&select=status&limit=1`, { headers: supabaseHeaders() });
+        if (!verify.ok) throw new Error(`Supabase cancellation verification failed: ${verify.status}`);
+        const current = (await verify.json())[0];
+        if (current?.status === "pago") return res.status(200).json({ status: "paid", confirmado: true });
+      }
+      return res.status(200).json({ status: "cancelado", confirmado: false });
+    }
+
     return res.status(200).json({
       status: ["pending", "expired", "cancelled"].includes(status) ? status : "unknown",
       confirmado: false,
