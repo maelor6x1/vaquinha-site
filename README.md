@@ -9,7 +9,7 @@
 - A foto original do Thor foi preservada.
 
 ## Pagamentos — NexusPag
-O endpoint `/api/pagar` cria novas cobranças exclusivamente na NexusPag e registra cada contribuição como pendente no Supabase antes de solicitar o PIX. O nome do doador é obrigatório. O site mantém QR Code e PIX copia e cola.
+O endpoint `/api/pagar` cria novas cobranças exclusivamente na NexusPag e registra cada contribuição como pendente no Supabase antes de solicitar o PIX. O nome do doador é opcional; quando não informado, a contribuição aparece como anônima. A mensagem do apoiador também é opcional e só aparece publicamente após a confirmação do pagamento. O site mantém QR Code e PIX copia e cola.
 
 Variáveis necessárias no Vercel:
 - `NEXUSPAG_API_KEY`: chave da NexusPag.

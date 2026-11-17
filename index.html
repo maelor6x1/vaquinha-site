@@ -27,7 +27,10 @@
       <article class="campaign-card">
         <div class="campaign-visual">
           <img src="./IMG_1531.jpeg" class="hero-image" alt="Thor, o cachorro que precisa de ajuda para tratar o câncer">
-          <div class="visual-caption"><span class="visual-heart">♥</span><span>Uma corrente de carinho pelo Thor</span></div>
+          <p class="publication-date">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2"></rect><path d="M7.5 3v4M16.5 3v4M3.5 10h17"></path></svg>
+            Publicado em 09/10/2026
+          </p>
         </div>
         <div class="campaign-content">
           <div class="eyebrow"><span class="dot"></span> CAMPANHA SOLIDÁRIA</div>
@@ -110,7 +113,18 @@
         <textarea id="donorMessage" name="message" class="text-input message-input" maxlength="300" rows="3" placeholder="Escreva uma mensagem de carinho ou apoio..."></textarea>
         <p class="field-hint">Sua mensagem poderá aparecer publicamente junto à contribuição. Até 300 caracteres.</p>
 
-        <div class="pix-info"><span class="pix-symbol" aria-label="PIX">PIX</span><div><strong>Pagamento via PIX</strong><p>Rápido, simples e sem cadastro.</p></div><span class="pix-check">✓</span></div>
+        <div class="pix-info">
+          <span class="pix-symbol" aria-hidden="true">
+            <svg viewBox="0 0 48 48" role="img" focusable="false">
+              <path d="M18.2 4.8a8.2 8.2 0 0 1 11.6 0l5.1 5.1-7.1 7.1a5.4 5.4 0 0 1-7.6 0l-7.1-7.1z"/>
+              <path d="M43.2 18.2a8.2 8.2 0 0 1 0 11.6l-5.1 5.1-7.1-7.1a5.4 5.4 0 0 1 0-7.6l7.1-7.1z"/>
+              <path d="M29.8 43.2a8.2 8.2 0 0 1-11.6 0l-5.1-5.1 7.1-7.1a5.4 5.4 0 0 1 7.6 0l7.1 7.1z"/>
+              <path d="M4.8 29.8a8.2 8.2 0 0 1 0-11.6l5.1-5.1 7.1 7.1a5.4 5.4 0 0 1 0 7.6l-7.1 7.1z"/>
+            </svg>
+          </span>
+          <div class="pix-info-copy"><strong>Pagamento via PIX</strong><p>Rápido, simples e sem cadastro.</p></div>
+          <span class="pix-check" aria-label="Forma de pagamento selecionada">✓</span>
+        </div>
         <button id="generatePixButton" class="button button-primary generate-button" type="submit">Gerar PIX <span aria-hidden="true">→</span></button>
         <p class="secure-note"><span aria-hidden="true">🔒</span> Ao gerar o PIX, a cobrança será criada. A contribuição só será contabilizada depois que o pagamento for confirmado.</p>
         <div id="paymentResult" class="payment-result" aria-live="polite"></div>

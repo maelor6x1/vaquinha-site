@@ -369,7 +369,12 @@ donationForm.addEventListener("submit", async (event) => {
   try {
     externalId = localStorage.getItem(PENDING_PAYMENT_KEY) || "";
     const savedAmount = Number(localStorage.getItem(PENDING_PAYMENT_AMOUNT_KEY));
-    if (externalId && Number.isFinite(savedAmount) && savedAmount >= 1) {
+    if (externalId) {
+      if (!Number.isFinite(savedAmount) || savedAmount < 1) {
+        showToast("Encontramos uma solicitação anterior sem o valor salvo. Verifique o pagamento antes de tentar novamente.");
+        recoverPendingPayment();
+        return;
+      }
       if (Math.round(savedAmount * 100) !== Math.round(amount * 100)) {
         amountInput.value = formatInput(savedAmount);
         showToast("Já existe uma solicitação em recuperação. Mantivemos o valor original para evitar cobrança duplicada.");
@@ -410,6 +415,10 @@ donationForm.addEventListener("submit", async (event) => {
       error.className = "error-message";
       error.textContent = typeof data.erro === "string" ? data.erro : "Não foi possível gerar o PIX agora. Tente novamente.";
       paymentResult.appendChild(error);
+
+      // Reconcilia o identificador salvo: a solicitação pode ter sido
+      // cancelada antes de chegar ao gateway ou já pode ter sido criada.
+      await recoverPendingPayment();
       return;
     }
     unresolvedPayment = false;

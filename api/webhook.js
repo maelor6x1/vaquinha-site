@@ -4,7 +4,17 @@ export const config = { api: { bodyParser: false } };
 
 async function readRawBody(req) {
   const chunks = [];
-  for await (const chunk of req) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  let totalBytes = 0;
+  for await (const chunk of req) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    totalBytes += buffer.length;
+    if (totalBytes > 64 * 1024) {
+      const error = new Error("Webhook body too large");
+      error.statusCode = 413;
+      throw error;
+    }
+    chunks.push(buffer);
+  }
   return Buffer.concat(chunks);
 }
 
@@ -50,9 +60,11 @@ async function findDonation(externalId) {
 async function markDonationPaid(donation, paidAt) {
   if (!donation) return "missing";
   if (donation.status === "pago") return "already_paid";
-  if (donation.status !== "pendente") return "not_pending";
+  // A confirmação real do provedor deve prevalecer sobre um cancelamento
+  // local anterior: webhooks podem chegar atrasados ou ser reenviados.
+  if (donation.status !== "pendente" && donation.status !== "cancelado") return "not_pending";
 
-  const query = `${process.env.SUPABASE_URL}/rest/v1/doacoes?id=eq.${encodeURIComponent(donation.id)}&status=eq.pendente&select=id,status`;
+  const query = `${process.env.SUPABASE_URL}/rest/v1/doacoes?id=eq.${encodeURIComponent(donation.id)}&status=in.(pendente,cancelado)&select=id,status`;
   const response = await fetch(query, {
     method: "PATCH",
     headers: supabaseHeaders({ Prefer: "return=representation" }),
@@ -103,12 +115,22 @@ export default async function handler(req, res) {
   try {
     rawBody = await readRawBody(req);
     event = JSON.parse(rawBody.toString("utf8"));
-  } catch {
+  } catch (bodyError) {
+    if (bodyError?.statusCode === 413) {
+      return res.status(413).json({ erro: "Corpo do webhook excede o limite permitido." });
+    }
     return res.status(400).json({ erro: "Corpo JSON inválido." });
   }
 
   if (!verifyNexusSignature(req.headers["x-webhook-signature"], rawBody)) {
     return res.status(401).json({ erro: "Assinatura NexusPag inválida." });
+  }
+
+  // A NexusPag documenta esse header como obrigatório. Conferimos o header
+  // com o corpo para impedir que um evento de outro tipo siga pelo fluxo de PIX.
+  const headerEvent = req.headers["x-webhook-event"];
+  if (typeof headerEvent !== "string" || headerEvent !== event.event) {
+    return res.status(400).json({ erro: "Tipo de evento NexusPag inválido." });
   }
 
   if (event.event !== "payment.confirmed" || event.status !== "paid") {
