@@ -324,3 +324,30 @@ h1 { max-width: 720px; font-size: clamp(32px, 5.5vw, 48px); }
   .campaign-content h1 { font-size: 26px; }
   .fundraising-top strong { font-size: 18px; }
 }
+
+
+/* Cabeçalho e foto mais compactos; data da publicação no rodapé da imagem. */
+.brand { font-size: 17px; gap: 7px; letter-spacing: -.35px; }
+.brand-mark { width: 29px; height: 29px; font-size: 18px; border-radius: 9px 9px 9px 3px; }
+.campaign-card { grid-template-columns: minmax(0, .82fr) minmax(350px, 1.18fr); }
+.campaign-visual { display: flex; flex-direction: column; align-self: start; min-height: 0; background: #fff; }
+.hero-image { display: block; width: 100%; height: auto; min-height: 0; max-height: 330px; aspect-ratio: 1.45 / 1; object-fit: cover; }
+.visual-caption { display: none; }
+.publication-date { display: flex; align-items: center; gap: 7px; margin: 0; padding: 12px 15px 13px; color: #7a857e; background: #fff; font-size: 11px; font-weight: 600; line-height: 1.4; }
+.publication-date svg { width: 14px; height: 14px; flex: 0 0 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+@media (min-width: 900px) {
+  .campaign-card { grid-template-columns: minmax(0, .82fr) minmax(350px, 1.18fr); }
+  .hero-image { max-height: 315px; aspect-ratio: 1.5 / 1; }
+  .publication-date { padding: 11px 14px 13px; }
+}
+@media (max-width: 760px) {
+  .brand { font-size: 16px; }
+  .brand-mark { width: 28px; height: 28px; font-size: 17px; }
+  .campaign-card { grid-template-columns: 1fr; }
+  .campaign-visual { width: 100%; }
+  .hero-image { width: 100%; height: auto; max-height: 215px; min-height: 0; aspect-ratio: 1.75 / 1; object-fit: cover; }
+  .publication-date { padding: 9px 13px 11px; font-size: 10.5px; }
+}
+@media (max-width: 380px) {
+  .hero-image { max-height: 195px; }
+}
