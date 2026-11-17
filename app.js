@@ -9,6 +9,7 @@ const generatePixButton = $("generatePixButton");
 let selectedAmount = 50;
 let unresolvedPayment = false;
 let toastTimer;
+const PENDING_PAYMENT_KEY = "thor_pending_external_id";
 
 function money(value) {
   return Number(value).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -48,7 +49,10 @@ function showDonation() {
   paymentResult.replaceChildren();
   window.scrollTo({ top: 0, behavior: "smooth" });
   if (unresolvedPayment) showUnresolvedPayment();
-  else amountInput.focus({ preventScroll: true });
+  else {
+    amountInput.focus({ preventScroll: true });
+    recoverPendingPayment();
+  }
 }
 function chooseAmount(amount) {
   selectedAmount = amount;
@@ -146,12 +150,75 @@ function safeText(element, value) {
   element.textContent = value == null ? "" : String(value);
 }
 function showUnresolvedPayment() {
+  unresolvedPayment = true;
   generatePixButton.disabled = true;
   generatePixButton.textContent = "Aguardando confirmação";
   const warning = document.createElement("p");
   warning.className = "error-message";
   warning.textContent = "Não foi possível confirmar se o PIX foi criado. Por segurança, não gere outro agora. Aguarde a confirmação ou entre em contato com a campanha antes de tentar novamente.";
   paymentResult.replaceChildren(warning);
+}
+async function recoverPendingPayment() {
+  let externalId = "";
+  try {
+    externalId = localStorage.getItem(PENDING_PAYMENT_KEY) || "";
+  } catch {
+    return;
+  }
+  if (!externalId) return;
+
+  generatePixButton.disabled = true;
+  generatePixButton.textContent = "Verificando PIX…";
+  const loading = document.createElement("p");
+  loading.className = "field-hint";
+  loading.textContent = "Verificando se sua contribuição já foi gerada ou confirmada…";
+  paymentResult.replaceChildren(loading);
+
+  try {
+    const response = await fetch("/api/consultar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ external_id: externalId })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.erro || "Não foi possível consultar o PIX.");
+    if (data.status === "paid" || data.confirmado === true) {
+      unresolvedPayment = false;
+      paymentResult.replaceChildren();
+      const confirmed = document.createElement("p");
+      confirmed.className = "success-message";
+      confirmed.textContent = "Pagamento confirmado! Obrigado por ajudar o Thor.";
+      paymentResult.appendChild(confirmed);
+      generatePixButton.disabled = true;
+      generatePixButton.textContent = "Pagamento confirmado";
+      loadCampaignSummary();
+      return;
+    }
+    if (data.status === "pending" && (data.pix || data.qr)) {
+      unresolvedPayment = false;
+      renderPayment(data, parseAmount(amountInput.value) || 0);
+      generatePixButton.disabled = true;
+      generatePixButton.textContent = "PIX já gerado";
+      return;
+    }
+    if (data.status === "expired" || data.status === "cancelled" || data.status === "cancelado") {
+      localStorage.removeItem(PENDING_PAYMENT_KEY);
+      unresolvedPayment = false;
+      paymentResult.replaceChildren();
+      const expired = document.createElement("p");
+      expired.className = "field-hint";
+      expired.textContent = "A solicitação anterior expirou ou foi cancelada. Você pode gerar um novo PIX.";
+      paymentResult.appendChild(expired);
+      generatePixButton.disabled = false;
+      generatePixButton.innerHTML = 'Gerar PIX <span aria-hidden="true">→</span>';
+      return;
+    }
+    unresolvedPayment = true;
+    showUnresolvedPayment();
+  } catch (error) {
+    unresolvedPayment = true;
+    showUnresolvedPayment();
+  }
 }
 function renderPayment(data, amount) {
   paymentResult.replaceChildren();
@@ -260,6 +327,21 @@ donationForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  let externalId;
+  try {
+    externalId = localStorage.getItem(PENDING_PAYMENT_KEY) || "";
+    if (!externalId) {
+      const randomPart = typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID().replaceAll("-", "")
+        : Math.random().toString(36).slice(2) + Date.now().toString(36);
+      externalId = `thor_${Date.now()}_${randomPart.slice(0, 24)}`;
+      localStorage.setItem(PENDING_PAYMENT_KEY, externalId);
+    }
+  } catch {
+    showToast("Não foi possível salvar a solicitação neste navegador. Tente novamente.");
+    return;
+  }
+
   generatePixButton.disabled = true;
   generatePixButton.textContent = "Gerando PIX…";
   paymentResult.replaceChildren();
@@ -267,11 +349,12 @@ donationForm.addEventListener("submit", async (event) => {
     const response = await fetch("/api/pagar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ valor: amount.toFixed(2), nome: name, mensagem: message })
+      body: JSON.stringify({ valor: amount.toFixed(2), nome: name, mensagem: message, external_id: externalId })
     });
     const data = await response.json().catch(() => ({}));
     if (data.resultado_indefinido === true) {
       unresolvedPayment = true;
+      if (data.external_id) localStorage.setItem(PENDING_PAYMENT_KEY, data.external_id);
       showUnresolvedPayment();
       return;
     }
@@ -282,7 +365,11 @@ donationForm.addEventListener("submit", async (event) => {
       paymentResult.appendChild(error);
       return;
     }
+    unresolvedPayment = false;
+    if (data.external_id) localStorage.setItem(PENDING_PAYMENT_KEY, data.external_id);
     renderPayment(data, amount);
+    generatePixButton.disabled = true;
+    generatePixButton.textContent = "PIX já gerado";
   } catch {
     // A conexão pode cair depois que o servidor já encaminhou a cobrança ao gateway.
     unresolvedPayment = true;
