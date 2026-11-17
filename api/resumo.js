@@ -1,3 +1,5 @@
+import { isRateLimited } from "../rate-limit.js";
+
 const MONTHLY_GOAL_CENTS = 100000;
 const CAMPAIGN_START = "2026-11-15T00:00:00-03:00";
 const TIME_ZONE = "America/Sao_Paulo";
@@ -78,6 +80,16 @@ export default async function handler(req, res) {
   }
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SECRET_KEY) {
     return res.status(500).json({ erro: "Banco de dados não configurado." });
+  }
+
+  try {
+    if (await isRateLimited(req, "resumo", 120, 600)) {
+      res.setHeader("Retry-After", "600");
+      return res.status(429).json({ erro: "Muitas consultas em pouco tempo. Aguarde alguns minutos." });
+    }
+  } catch (rateLimitError) {
+    console.error("Campaign summary rate limiter unavailable", rateLimitError?.message || rateLimitError);
+    return res.status(503).json({ erro: "O resumo está temporariamente indisponível." });
   }
 
   try {
