@@ -104,9 +104,9 @@
         <textarea id="donorMessage" name="message" class="text-input message-input" maxlength="300" rows="3" placeholder="Escreva uma mensagem de carinho ou apoio..."></textarea>
         <p class="field-hint">Sua mensagem poderá aparecer publicamente junto à contribuição. Até 300 caracteres.</p>
 
-        <div class="pix-info"><span class="pix-symbol">₱</span><div><strong>Pagamento via PIX</strong><p>Rápido, simples e sem cadastro.</p></div><span class="pix-check">✓</span></div>
+        <div class="pix-info"><span class="pix-symbol" aria-label="PIX">PIX</span><div><strong>Pagamento via PIX</strong><p>Rápido, simples e sem cadastro.</p></div><span class="pix-check">✓</span></div>
         <button id="generatePixButton" class="button button-primary generate-button" type="submit">Gerar PIX <span aria-hidden="true">→</span></button>
-        <p class="secure-note"><span aria-hidden="true">🔒</span> Você só verá uma cobrança real quando confirmar a geração do PIX.</p>
+        <p class="secure-note"><span aria-hidden="true">🔒</span> Ao gerar o PIX, a cobrança será criada. A contribuição só será contabilizada depois que o pagamento for confirmado.</p>
         <div id="paymentResult" class="payment-result" aria-live="polite"></div>
       </form>
     </section>
