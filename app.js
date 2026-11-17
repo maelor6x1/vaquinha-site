@@ -7,6 +7,7 @@ const donationForm = $("donationForm");
 const paymentResult = $("paymentResult");
 const generatePixButton = $("generatePixButton");
 let selectedAmount = 50;
+let unresolvedPayment = false;
 let toastTimer;
 
 function money(value) {
@@ -46,7 +47,8 @@ function showDonation() {
   donationScreen.classList.add("active");
   paymentResult.replaceChildren();
   window.scrollTo({ top: 0, behavior: "smooth" });
-  amountInput.focus({ preventScroll: true });
+  if (unresolvedPayment) showUnresolvedPayment();
+  else amountInput.focus({ preventScroll: true });
 }
 function chooseAmount(amount) {
   selectedAmount = amount;
@@ -142,6 +144,14 @@ async function shareCampaign() {
 }
 function safeText(element, value) {
   element.textContent = value == null ? "" : String(value);
+}
+function showUnresolvedPayment() {
+  generatePixButton.disabled = true;
+  generatePixButton.textContent = "Aguardando confirmação";
+  const warning = document.createElement("p");
+  warning.className = "error-message";
+  warning.textContent = "Não foi possível confirmar se o PIX foi criado. Por segurança, não gere outro agora. Aguarde a confirmação ou entre em contato com a campanha antes de tentar novamente.";
+  paymentResult.replaceChildren(warning);
 }
 function renderPayment(data, amount) {
   paymentResult.replaceChildren();
@@ -254,6 +264,11 @@ donationForm.addEventListener("submit", async (event) => {
       body: JSON.stringify({ valor: amount.toFixed(2), nome: name, mensagem: message })
     });
     const data = await response.json().catch(() => ({}));
+    if (data.resultado_indefinido === true) {
+      unresolvedPayment = true;
+      showUnresolvedPayment();
+      return;
+    }
     if (!response.ok || data.erro) {
       const error = document.createElement("p");
       error.className = "error-message";
@@ -263,13 +278,14 @@ donationForm.addEventListener("submit", async (event) => {
     }
     renderPayment(data, amount);
   } catch {
-    const error = document.createElement("p");
-    error.className = "error-message";
-    error.textContent = "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.";
-    paymentResult.appendChild(error);
+    // A conexão pode cair depois que o servidor já encaminhou a cobrança ao gateway.
+    unresolvedPayment = true;
+    showUnresolvedPayment();
   } finally {
-    generatePixButton.disabled = false;
-    generatePixButton.innerHTML = 'Gerar PIX <span aria-hidden="true">→</span>';
+    if (!unresolvedPayment) {
+      generatePixButton.disabled = false;
+      generatePixButton.innerHTML = 'Gerar PIX <span aria-hidden="true">→</span>';
+    }
   }
 });
 
