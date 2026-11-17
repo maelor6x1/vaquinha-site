@@ -8,6 +8,7 @@ const paymentResult = $("paymentResult");
 const generatePixButton = $("generatePixButton");
 let selectedAmount = 50;
 let unresolvedPayment = false;
+let paymentReady = false;
 let toastTimer;
 const PENDING_PAYMENT_KEY = "thor_pending_external_id";
 
@@ -48,11 +49,8 @@ function showDonation() {
   donationScreen.classList.add("active");
   paymentResult.replaceChildren();
   window.scrollTo({ top: 0, behavior: "smooth" });
-  if (unresolvedPayment) showUnresolvedPayment();
-  else {
-    amountInput.focus({ preventScroll: true });
-    recoverPendingPayment();
-  }
+  amountInput.focus({ preventScroll: true });
+  recoverPendingPayment();
 }
 function chooseAmount(amount) {
   selectedAmount = amount;
@@ -165,8 +163,14 @@ async function recoverPendingPayment() {
   } catch {
     return;
   }
-  if (!externalId) return;
+  if (!externalId) {
+    unresolvedPayment = false;
+    paymentReady = false;
+    return;
+  }
 
+  unresolvedPayment = false;
+  paymentReady = false;
   generatePixButton.disabled = true;
   generatePixButton.textContent = "Verificando PIX…";
   const loading = document.createElement("p");
@@ -184,6 +188,7 @@ async function recoverPendingPayment() {
     if (!response.ok) throw new Error(data.erro || "Não foi possível consultar o PIX.");
     if (data.status === "paid" || data.confirmado === true) {
       unresolvedPayment = false;
+      paymentReady = true;
       paymentResult.replaceChildren();
       const confirmed = document.createElement("p");
       confirmed.className = "success-message";
@@ -196,6 +201,7 @@ async function recoverPendingPayment() {
     }
     if (data.status === "pending" && (data.pix || data.qr)) {
       unresolvedPayment = false;
+      paymentReady = true;
       renderPayment(data, parseAmount(amountInput.value) || 0);
       generatePixButton.disabled = true;
       generatePixButton.textContent = "PIX já gerado";
@@ -204,6 +210,7 @@ async function recoverPendingPayment() {
     if (data.status === "expired" || data.status === "cancelled" || data.status === "cancelado") {
       localStorage.removeItem(PENDING_PAYMENT_KEY);
       unresolvedPayment = false;
+      paymentReady = false;
       paymentResult.replaceChildren();
       const expired = document.createElement("p");
       expired.className = "field-hint";
@@ -342,6 +349,7 @@ donationForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  paymentReady = false;
   generatePixButton.disabled = true;
   generatePixButton.textContent = "Gerando PIX…";
   paymentResult.replaceChildren();
@@ -366,6 +374,7 @@ donationForm.addEventListener("submit", async (event) => {
       return;
     }
     unresolvedPayment = false;
+    paymentReady = true;
     if (data.external_id) localStorage.setItem(PENDING_PAYMENT_KEY, data.external_id);
     renderPayment(data, amount);
     generatePixButton.disabled = true;
@@ -375,7 +384,7 @@ donationForm.addEventListener("submit", async (event) => {
     unresolvedPayment = true;
     showUnresolvedPayment();
   } finally {
-    if (!unresolvedPayment) {
+    if (!unresolvedPayment && !paymentReady) {
       generatePixButton.disabled = false;
       generatePixButton.innerHTML = 'Gerar PIX <span aria-hidden="true">→</span>';
     }
