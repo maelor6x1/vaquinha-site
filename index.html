@@ -25,52 +25,58 @@
   <main id="inicio" class="container">
     <section id="campaignScreen" class="screen active" aria-labelledby="campaignTitle">
       <article class="campaign-card">
-        <img src="./IMG_1531.jpeg" class="hero-image" alt="Thor, o cachorro que precisa de ajuda para tratar o câncer">
+        <div class="campaign-visual">
+          <img src="./IMG_1531.jpeg" class="hero-image" alt="Thor, o cachorro que precisa de ajuda para tratar o câncer">
+          <div class="visual-caption"><span class="visual-heart">♥</span><span>Uma corrente de carinho pelo Thor</span></div>
+        </div>
         <div class="campaign-content">
-          <div class="eyebrow"><span class="dot"></span> CAMPANHA SOLIDÁRIA · ATUALIZAÇÃO MENSAL</div>
+          <div class="eyebrow"><span class="dot"></span> CAMPANHA SOLIDÁRIA</div>
           <h1 id="campaignTitle">Vamos cuidar do Thor juntos?</h1>
           <p class="lead">O Thor está enfrentando o câncer e precisa de apoio para continuar recebendo os cuidados veterinários necessários. Cada contribuição ajuda nessa caminhada.</p>
 
-          <section class="story">
-            <span class="eyebrow">A HISTÓRIA DELE</span>
-            <h2>Conheça o Thor</h2>
-            <p>O Thor recebeu um diagnóstico de câncer e precisa de cuidados veterinários para enfrentar essa etapa. Por trás de cada consulta, exame e procedimento existe uma família que está fazendo o possível para oferecer a ele atenção, conforto e a chance de continuar o tratamento.</p>
-            <p>Não existe contribuição pequena quando o objetivo é cuidar de quem faz parte da família. Uma ajuda de R$ 1,00 já participa dessa corrente de solidariedade; várias pequenas contribuições, somadas, podem ajudar a tornar os próximos cuidados possíveis.</p>
-            <p>Esta campanha foi criada para reunir apoio aos custos veterinários do Thor. A necessidade de cada exame, cirurgia, medicamento ou acompanhamento deve ser definida pelo médico-veterinário responsável. Vamos compartilhar a caminhada com transparência e atualizar a arrecadação a cada mês.</p>
-            <h3>Como sua contribuição ajuda</h3>
-            <ul class="help-list">
-              <li>Custos de consultas e acompanhamento veterinário.</li>
-              <li>Exames e avaliações relacionados ao tratamento.</li>
-              <li>Despesas da cirurgia e dos cuidados indicados pelo veterinário.</li>
-              <li>Medicamentos e cuidados durante a recuperação, conforme a necessidade.</li>
-            </ul>
-            <p>Se não puder contribuir agora, compartilhar a campanha com amigos e familiares também é uma forma muito importante de ajudar. ❤️</p>
-            <p class="honesty-note">As contribuições são destinadas aos custos veterinários e ao tratamento do Thor. A evolução da campanha e a arrecadação serão atualizadas mensalmente.</p>
-          </section>
-
           <section class="fundraising-card" aria-label="Progresso da arrecadação">
+            <div class="fundraising-heading"><span class="eyebrow">ARRECADAÇÃO DESTE MÊS</span><span class="live-dot">Atualizada</span></div>
             <div class="fundraising-top">
-              <div><span class="muted">Arrecadado neste mês</span><strong id="raisedAmount">R$ 0,00</strong></div>
+              <div><span class="muted">Já arrecadamos</span><strong id="raisedAmount">R$ 0,00</strong></div>
               <div class="goal"><span class="muted">Meta mensal</span><strong id="goalAmount">R$ 1.000,00</strong></div>
             </div>
             <div class="progress-track"><div class="progress-bar" id="progressBar" style="width: 0%"></div></div>
-            <div class="progress-caption"><strong id="progressPercent">0%</strong><span id="remainingText">Vamos alcançar a meta deste mês</span></div><p class="month-caption" id="monthLabel">Meta renovada todo mês</p>
-            <div class="supporter-count"><span class="avatar-stack" aria-hidden="true">♥</span><span><strong id="supporterCount">0</strong> apoiadores neste mês</span></div>
+            <div class="progress-caption"><strong id="progressPercent">0%</strong><span id="remainingText">Vamos alcançar a meta deste mês</span></div>
+            <p class="month-caption" id="monthLabel">Meta renovada todo mês</p>
+            <div class="supporter-count"><span class="avatar-stack" aria-hidden="true">♥</span><span><strong id="supporterCount">0</strong> pessoas já apoiaram neste mês</span></div>
           </section>
 
           <div class="action-buttons">
-            <button class="button button-primary" id="contributeButton" type="button">Quero contribuir <span aria-hidden="true">→</span></button>
-            <button class="button button-secondary" id="shareButton" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.7 10.7 6.6-4.4M8.7 13.3l6.6 4.4"></path></svg> Compartilhar campanha</button>
+            <button class="button button-primary" id="contributeButton" type="button">Fazer uma doação <span aria-hidden="true">→</span></button>
+            <button class="button button-secondary" id="shareButton" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.7 10.7 6.6-4.4M8.7 13.3l6.6 4.4"></path></svg> Compartilhar</button>
           </div>
+          <p class="campaign-trust"> <span aria-hidden="true">♥</span> Sua contribuição ajuda a custear os cuidados veterinários do Thor.</p>
         </div>
       </article>
 
-      <section class="supporters-card">
-        <div class="section-heading"><div><span class="eyebrow">GRATIDÃO</span><h2>Últimos apoiadores</h2></div><span class="heart-bubble">♥</span></div>
-        <ul id="supportersList" class="supporters-list">
-          <li class="empty-supporters">As contribuições deste mês aparecerão aqui após a confirmação do PIX.</li>
+      <section class="story-card story" aria-label="História da campanha">
+        <span class="eyebrow">A HISTÓRIA DELE</span>
+        <h2>Conheça o Thor</h2>
+        <p>O Thor recebeu um diagnóstico de câncer e precisa de cuidados veterinários para enfrentar essa etapa. Por trás de cada consulta, exame e procedimento existe uma família que está fazendo o possível para oferecer a ele atenção, conforto e a chance de continuar o tratamento.</p>
+        <p>Não existe contribuição pequena quando o objetivo é cuidar de quem faz parte da família. Uma ajuda de R$ 1,00 já participa dessa corrente de solidariedade; várias pequenas contribuições, somadas, podem ajudar a tornar os próximos cuidados possíveis.</p>
+        <p>Esta campanha foi criada para reunir apoio aos custos veterinários do Thor. A necessidade de cada exame, cirurgia, medicamento ou acompanhamento deve ser definida pelo médico-veterinário responsável. Vamos compartilhar a caminhada com transparência e atualizar a arrecadação a cada mês.</p>
+        <h3>Como sua contribuição ajuda</h3>
+        <ul class="help-list">
+          <li>Custos de consultas e acompanhamento veterinário.</li>
+          <li>Exames e avaliações relacionados ao tratamento.</li>
+          <li>Despesas da cirurgia e dos cuidados indicados pelo veterinário.</li>
+          <li>Medicamentos e cuidados durante a recuperação, conforme a necessidade.</li>
         </ul>
-        <p class="small-note">Os nomes e valores são exibidos somente após a confirmação do pagamento. ❤️</p>
+        <p>Se não puder contribuir agora, compartilhar a campanha com amigos e familiares também é uma forma muito importante de ajudar. ❤️</p>
+        <p class="honesty-note">As contribuições são destinadas aos custos veterinários e ao tratamento do Thor. A evolução da campanha e a arrecadação serão atualizadas mensalmente.</p>
+      </section>
+
+      <section class="supporters-card">
+        <div class="section-heading"><div><span class="eyebrow">QUEM ESTÁ COM O THOR</span><h2>Doadores e mensagens</h2></div><span class="heart-bubble">♥</span></div>
+        <ul id="supportersList" class="supporters-list">
+          <li class="empty-supporters">As contribuições e mensagens aparecerão aqui após a confirmação do PIX.</li>
+        </ul>
+        <p class="small-note">Os nomes, valores e mensagens são exibidos somente após a confirmação do pagamento. ❤️</p>
       </section>
     </section>
 
