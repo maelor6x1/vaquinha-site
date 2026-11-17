@@ -5,7 +5,7 @@ export const config = { api: { bodyParser: false } };
 async function readRawBody(req) {
   const chunks = [];
   for await (const chunk of req) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-  return Buffer.concat(chunks).toString("utf8");
+  return Buffer.concat(chunks);
 }
 
 function supabaseHeaders(extra = {}) {
@@ -15,20 +15,27 @@ function supabaseHeaders(extra = {}) {
 
 function verifyNexusSignature(signature, rawBody) {
   const secret = process.env.WEBHOOK_SECRET;
-  if (!secret || typeof signature !== "string") return false;
+  if (!secret || typeof signature !== "string" || !Buffer.isBuffer(rawBody)) return false;
+
   const fields = Object.fromEntries(signature.split(",").map((part) => {
     const index = part.indexOf("=");
     return index < 0
       ? [part.trim(), ""]
       : [part.slice(0, index).trim(), part.slice(index + 1).trim()];
   }));
+
   const timestamp = Number(fields.t);
   const receivedHex = fields.v1 || "";
   if (!Number.isInteger(timestamp) || !/^[a-f0-9]{64}$/i.test(receivedHex)) return false;
   if (Math.abs(Math.floor(Date.now() / 1000) - timestamp) > 300) return false;
 
-  const expected = crypto.createHmac("sha256", secret).update(`${timestamp}.${rawBody}`).digest();
+  const expected = crypto
+    .createHmac("sha256", secret)
+    .update(`${timestamp}.`)
+    .update(rawBody)
+    .digest();
   const received = Buffer.from(receivedHex, "hex");
+
   return received.length === expected.length && crypto.timingSafeEqual(expected, received);
 }
 
@@ -41,15 +48,44 @@ async function findDonation(externalId) {
 }
 
 async function markDonationPaid(donation, paidAt) {
-  if (!donation || donation.status !== "pendente") return false;
-  const query = `${process.env.SUPABASE_URL}/rest/v1/doacoes?id=eq.${donation.id}&status=eq.pendente`;
+  if (!donation) return "missing";
+  if (donation.status === "pago") return "already_paid";
+  if (donation.status !== "pendente") return "not_pending";
+
+  const query = `${process.env.SUPABASE_URL}/rest/v1/doacoes?id=eq.${encodeURIComponent(donation.id)}&status=eq.pendente&select=id,status`;
   const response = await fetch(query, {
     method: "PATCH",
-    headers: supabaseHeaders({ Prefer: "return=minimal" }),
-    body: JSON.stringify({ status: "pago", pago_em: paidAt || new Date().toISOString() })
+    headers: supabaseHeaders({ Prefer: "return=representation" }),
+    body: JSON.stringify({ status: "pago", pago_em: paidAt })
   });
+
   if (!response.ok) throw new Error(`Supabase paid update failed: ${response.status}`);
-  return true;
+
+  const updatedRows = await response.json();
+  if (Array.isArray(updatedRows) && updatedRows.some((row) => row.id === donation.id && row.status === "pago")) {
+    return "updated";
+  }
+
+  // Outra chamada pode ter confirmado a mesma doação entre a consulta e o PATCH.
+  const current = await findDonationById(donation.id);
+  if (current?.status === "pago") return "already_paid";
+  throw new Error("Donation was not updated to paid.");
+}
+
+async function findDonationById(id) {
+  const query = `${process.env.SUPABASE_URL}/rest/v1/doacoes?id=eq.${encodeURIComponent(id)}&select=id,status&limit=1`;
+  const response = await fetch(query, { headers: supabaseHeaders() });
+  if (!response.ok) throw new Error(`Supabase status verification failed: ${response.status}`);
+  const rows = await response.json();
+  return rows[0] || null;
+}
+
+function normalizePaidAt(value) {
+  if (typeof value === "string") {
+    const parsed = Date.parse(value);
+    if (Number.isFinite(parsed)) return new Date(parsed).toISOString();
+  }
+  return new Date().toISOString();
 }
 
 export default async function handler(req, res) {
@@ -66,7 +102,7 @@ export default async function handler(req, res) {
   let event;
   try {
     rawBody = await readRawBody(req);
-    event = JSON.parse(rawBody);
+    event = JSON.parse(rawBody.toString("utf8"));
   } catch {
     return res.status(400).json({ erro: "Corpo JSON inválido." });
   }
@@ -88,15 +124,21 @@ export default async function handler(req, res) {
   try {
     const donation = await findDonation(externalId);
     if (!donation) return res.status(404).json({ erro: "Contribuição não encontrada." });
+
     if (Math.abs(Number(donation.valor_centavos) / 100 - amount) > 0.009) {
       console.error("NexusPag webhook amount mismatch", externalId);
       return res.status(400).json({ erro: "Valor do pagamento não corresponde à contribuição." });
     }
-    if (donation.status === "pago") return res.status(200).json({ recebido: true, duplicado: true });
-    if (donation.status !== "pendente") return res.status(200).json({ recebido: true, ignorado: true });
 
-    await markDonationPaid(donation, event.paid_at);
-    return res.status(200).json({ recebido: true });
+    const result = await markDonationPaid(donation, normalizePaidAt(event.paid_at));
+    if (result === "not_pending") {
+      return res.status(200).json({ recebido: true, ignorado: true });
+    }
+
+    return res.status(200).json({
+      recebido: true,
+      ...(result === "already_paid" ? { duplicado: true } : {})
+    });
   } catch (error) {
     console.error("NexusPag webhook processing failed", error?.message || error);
     return res.status(500).json({ erro: "Falha ao processar confirmação." });
