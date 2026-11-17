@@ -35,7 +35,7 @@ export default async function handler(req, res) {
     if (!lookup.ok) throw new Error(`Supabase lookup failed: ${lookup.status}`);
     const rows = await lookup.json();
     const donation = rows[0];
-    if (!donation) return res.status(404).json({ erro: "Contribuição não encontrada." });
+    if (!donation) return res.status(200).json({ status: "not_found", confirmado: false });
 
     if (donation.status === "pago") {
       return res.status(200).json({ status: "paid", confirmado: true });
