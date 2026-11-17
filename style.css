@@ -110,6 +110,7 @@ h1 { margin: 10px 0 10px; font-size: clamp(29px, 6vw, 43px); line-height: 1.08; 
 .pix-code { display: block; width: 100%; min-height: 100px; margin: 0 0 12px; padding: 12px; border: 1px solid #dce5de; border-radius: 10px; resize: vertical; overflow-wrap: anywhere; font-size: 12px; }
 .copy-button { min-height: 48px; font-size: 14px; }
 .error-message { padding: 13px; border-radius: 12px; color: var(--danger); background: #fff0f0; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.success-message { padding: 13px; border-radius: 12px; color: #166534; background: #ecfdf3; font-size: 13px; line-height: 1.5; }
 .toast { position: fixed; z-index: 20; left: 50%; bottom: max(22px, env(safe-area-inset-bottom)); width: max-content; max-width: calc(100% - 32px); padding: 12px 17px; border-radius: 14px; color: white; background: #202a23; box-shadow: 0 10px 30px #0002; font-size: 13px; font-weight: 800; opacity: 0; pointer-events: none; transform: translate(-50%, 12px); transition: opacity .2s, transform .2s; }
 .toast.visible { opacity: 1; transform: translate(-50%, 0); }
 @media (min-width: 760px) { .container { margin-top: 34px; } .campaign-content { padding: 34px 40px 38px; } .action-buttons { grid-template-columns: 1fr 1fr; } }
