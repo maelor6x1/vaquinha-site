@@ -6,7 +6,7 @@ const amountInput = $("amountInput");
 const donationForm = $("donationForm");
 const paymentResult = $("paymentResult");
 const generatePixButton = $("generatePixButton");
-let selectedAmount = 10;
+let selectedAmount = 50;
 let toastTimer;
 
 function money(value) {
@@ -88,9 +88,18 @@ async function loadCampaignSummary() {
         const name = document.createElement("span");
         name.className = "supporter-name";
         name.textContent = donation.nome || "Apoiador anônimo";
+        const details = document.createElement("div");
+        details.className = "supporter-details";
+        details.appendChild(name);
+        if (donation.mensagem) {
+          const message = document.createElement("p");
+          message.className = "supporter-message";
+          message.textContent = donation.mensagem;
+          details.appendChild(message);
+        }
         const amount = document.createElement("strong");
         amount.textContent = money(Number(donation.valor_centavos || 0) / 100);
-        li.append(avatar, name, amount);
+        li.append(avatar, details, amount);
         list.appendChild(li);
       });
     } else {
@@ -211,15 +220,16 @@ donationForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const amount = parseAmount(amountInput.value);
   const name = $("donorName").value.trim();
+  const message = $("donorMessage").value.trim();
 
-  if (name.length < 2) {
-    showToast("Informe seu nome completo para continuar.");
-    $("donorName").focus();
-    return;
-  }
   if (name.length > 100) {
     showToast("O nome deve ter no máximo 100 caracteres.");
     $("donorName").focus();
+    return;
+  }
+  if (message.length > 300) {
+    showToast("A mensagem deve ter no máximo 300 caracteres.");
+    $("donorMessage").focus();
     return;
   }
 
@@ -241,7 +251,7 @@ donationForm.addEventListener("submit", async (event) => {
     const response = await fetch("/api/pagar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ valor: amount.toFixed(2), nome: name })
+      body: JSON.stringify({ valor: amount.toFixed(2), nome: name, mensagem: message })
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || data.erro) {
@@ -263,5 +273,6 @@ donationForm.addEventListener("submit", async (event) => {
   }
 });
 
+chooseAmount(50);
 updateProgress();
 loadCampaignSummary();
