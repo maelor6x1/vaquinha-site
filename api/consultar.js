@@ -87,6 +87,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       status: ["pending", "expired", "cancelled"].includes(status) ? status : "unknown",
       confirmado: false,
+      amount: Number(donation.valor_centavos) / 100,
       pix: typeof transaction.pix_copia_cola === "string" ? transaction.pix_copia_cola : "",
       qr: typeof transaction.qr_code_base64 === "string" ? transaction.qr_code_base64 : ""
     });
