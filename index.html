@@ -113,7 +113,18 @@
         <textarea id="donorMessage" name="message" class="text-input message-input" maxlength="300" rows="3" placeholder="Escreva uma mensagem de carinho ou apoio..."></textarea>
         <p class="field-hint">Sua mensagem poderá aparecer publicamente junto à contribuição. Até 300 caracteres.</p>
 
-        <div class="pix-info"><span class="pix-symbol" aria-label="PIX">PIX</span><div><strong>Pagamento via PIX</strong><p>Rápido, simples e sem cadastro.</p></div><span class="pix-check">✓</span></div>
+        <div class="pix-info">
+          <span class="pix-symbol" aria-hidden="true">
+            <svg viewBox="0 0 48 48" role="img" focusable="false">
+              <path d="M18.2 4.8a8.2 8.2 0 0 1 11.6 0l5.1 5.1-7.1 7.1a5.4 5.4 0 0 1-7.6 0l-7.1-7.1z"/>
+              <path d="M43.2 18.2a8.2 8.2 0 0 1 0 11.6l-5.1 5.1-7.1-7.1a5.4 5.4 0 0 1 0-7.6l7.1-7.1z"/>
+              <path d="M29.8 43.2a8.2 8.2 0 0 1-11.6 0l-5.1-5.1 7.1-7.1a5.4 5.4 0 0 1 7.6 0l7.1 7.1z"/>
+              <path d="M4.8 29.8a8.2 8.2 0 0 1 0-11.6l5.1-5.1 7.1 7.1a5.4 5.4 0 0 1 0 7.6l-7.1 7.1z"/>
+            </svg>
+          </span>
+          <div class="pix-info-copy"><strong>Pagamento via PIX</strong><p>Rápido, simples e sem cadastro.</p></div>
+          <span class="pix-check" aria-label="Forma de pagamento selecionada">✓</span>
+        </div>
         <button id="generatePixButton" class="button button-primary generate-button" type="submit">Gerar PIX <span aria-hidden="true">→</span></button>
         <p class="secure-note"><span aria-hidden="true">🔒</span> Ao gerar o PIX, a cobrança será criada. A contribuição só será contabilizada depois que o pagamento for confirmado.</p>
         <div id="paymentResult" class="payment-result" aria-live="polite"></div>
