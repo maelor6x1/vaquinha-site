@@ -369,7 +369,12 @@ donationForm.addEventListener("submit", async (event) => {
   try {
     externalId = localStorage.getItem(PENDING_PAYMENT_KEY) || "";
     const savedAmount = Number(localStorage.getItem(PENDING_PAYMENT_AMOUNT_KEY));
-    if (externalId && Number.isFinite(savedAmount) && savedAmount >= 1) {
+    if (externalId) {
+      if (!Number.isFinite(savedAmount) || savedAmount < 1) {
+        showToast("Encontramos uma solicitação anterior sem o valor salvo. Verifique o pagamento antes de tentar novamente.");
+        recoverPendingPayment();
+        return;
+      }
       if (Math.round(savedAmount * 100) !== Math.round(amount * 100)) {
         amountInput.value = formatInput(savedAmount);
         showToast("Já existe uma solicitação em recuperação. Mantivemos o valor original para evitar cobrança duplicada.");
