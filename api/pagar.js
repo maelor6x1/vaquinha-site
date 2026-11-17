@@ -41,9 +41,9 @@ export default async function handler(req, res) {
   try {
     const amount = parseAmount(req.body?.valor);
     const name = typeof req.body?.nome === "string" ? req.body.nome.trim() : "";
-    if (name.length < 2 || name.length > 100) {
-      return res.status(400).json({ erro: "Informe seu nome completo (de 2 a 100 caracteres)." });
-    }
+    const message = typeof req.body?.mensagem === "string" ? req.body.mensagem.trim() : "";
+    if (name.length > 100) return res.status(400).json({ erro: "O nome deve ter no máximo 100 caracteres." });
+    if (message.length > 300) return res.status(400).json({ erro: "A mensagem deve ter no máximo 300 caracteres." });
     if (!Number.isFinite(amount) || amount < 1) {
       return res.status(400).json({ erro: "O valor mínimo para doar é R$ 1,00." });
     }
@@ -55,7 +55,8 @@ export default async function handler(req, res) {
       method: "POST",
       headers: supabaseHeaders({ Prefer: "return=minimal" }),
       body: JSON.stringify({
-        nome: name,
+        nome: name || "Apoiador anônimo",
+        mensagem: message || null,
         valor_centavos: amountCents,
         status: "pendente",
         provedor: "nexuspag",
@@ -79,7 +80,7 @@ export default async function handler(req, res) {
       headers: { "Content-Type": "application/json", "x-api-key": apiKey },
       body: JSON.stringify({
         amount,
-        description: `Doação para o Thor - ${name}`,
+        description: "Doação para a campanha do Thor",
         external_id: externalId,
         webhook_url: `${baseUrl}/api/webhook`,
         expiration: 1800
