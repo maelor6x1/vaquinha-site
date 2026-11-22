@@ -176,7 +176,8 @@ export default async function handler(req, res) {
       qr,
       id: transaction.id || transaction.transaction_id || externalId,
       external_id: externalId,
-      status: transaction.status || "pending"
+      status: transaction.status || "pending",
+      expires_at: typeof transaction.expires_at === "string" ? transaction.expires_at : null
     });
   } catch (error) {
     // Depois que a requisição foi enviada ao gateway, o resultado pode ser ambíguo:
