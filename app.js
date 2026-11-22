@@ -38,6 +38,10 @@ function showToast(message) {
   toastTimer = setTimeout(() => toast.classList.remove("visible"), 2600);
 }
 function showCampaign() {
+  if (pixExpiryInterval) {
+    clearInterval(pixExpiryInterval);
+    pixExpiryInterval = null;
+  }
   donationScreen.hidden = true;
   donationScreen.classList.remove("active");
   campaignScreen.hidden = false;
