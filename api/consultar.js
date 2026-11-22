@@ -96,7 +96,11 @@ export default async function handler(req, res) {
       return res.status(200).json({ status: "paid", confirmado: true });
     }
 
-    if (status === "expired" || status === "cancelled") {
+    const expiresAt = typeof transaction?.expires_at === "string" ? transaction.expires_at : null;
+    const expiredByTime = status === "pending" && expiresAt &&
+      Number.isFinite(Date.parse(expiresAt)) && Date.parse(expiresAt) <= Date.now();
+
+    if (status === "expired" || status === "cancelled" || expiredByTime) {
       const cancelUrl = `${supabaseUrl}/rest/v1/doacoes?id=eq.${encodeURIComponent(donation.id)}&status=eq.pendente&select=id,status`;
       const cancel = await fetch(cancelUrl, {
         method: "PATCH",
@@ -111,7 +115,11 @@ export default async function handler(req, res) {
         const current = (await verify.json())[0];
         if (current?.status === "pago") return res.status(200).json({ status: "paid", confirmado: true });
       }
-      return res.status(200).json({ status: "cancelado", confirmado: false });
+      return res.status(200).json({
+        status: expiredByTime || status === "expired" ? "expired" : "cancelado",
+        confirmado: false,
+        expires_at: expiresAt
+      });
     }
 
     return res.status(200).json({
@@ -119,7 +127,8 @@ export default async function handler(req, res) {
       confirmado: false,
       amount: Number(donation.valor_centavos) / 100,
       pix: typeof transaction.pix_copia_cola === "string" ? transaction.pix_copia_cola : "",
-      qr: typeof transaction.qr_code_base64 === "string" ? transaction.qr_code_base64 : ""
+      qr: typeof transaction.qr_code_base64 === "string" ? transaction.qr_code_base64 : "",
+      expires_at: expiresAt
     });
   } catch (error) {
     console.error("NexusPag payment lookup failed", error?.message || error);

@@ -10,6 +10,7 @@ let selectedAmount = 50;
 let unresolvedPayment = false;
 let paymentReady = false;
 let toastTimer;
+let pixExpiryInterval;
 const PENDING_PAYMENT_KEY = "thor_pending_external_id";
 const PENDING_PAYMENT_AMOUNT_KEY = "thor_pending_amount";
 
@@ -37,6 +38,10 @@ function showToast(message) {
   toastTimer = setTimeout(() => toast.classList.remove("visible"), 2600);
 }
 function showCampaign() {
+  if (pixExpiryInterval) {
+    clearInterval(pixExpiryInterval);
+    pixExpiryInterval = null;
+  }
   donationScreen.hidden = true;
   donationScreen.classList.remove("active");
   campaignScreen.hidden = false;
@@ -211,7 +216,7 @@ async function recoverPendingPayment() {
     if (data.status === "pending" && (data.pix || data.qr)) {
       unresolvedPayment = false;
       paymentReady = true;
-      renderPayment(data, Number(data.amount) || parseAmount(amountInput.value) || 0);
+      renderPayment(data, Number(data.amount) || parseAmount(amountInput.value) || 0, data.expires_at);
       generatePixButton.disabled = true;
       generatePixButton.textContent = "PIX já gerado";
       return;
@@ -248,7 +253,11 @@ async function recoverPendingPayment() {
     showUnresolvedPayment();
   }
 }
-function renderPayment(data, amount) {
+function renderPayment(data, amount, expiresAt) {
+  if (pixExpiryInterval) {
+    clearInterval(pixExpiryInterval);
+    pixExpiryInterval = null;
+  }
   paymentResult.replaceChildren();
   const panel = document.createElement("section");
   panel.className = "pix-result-card";
@@ -302,6 +311,31 @@ function renderPayment(data, amount) {
     warning.textContent = "O provedor não retornou o código PIX esperado. Nenhum valor foi somado à arrecadação.";
     panel.appendChild(warning);
   }
+  const expiry = Date.parse(expiresAt || "");
+  if (Number.isFinite(expiry)) {
+    const expiryNotice = document.createElement("p");
+    expiryNotice.className = "field-hint";
+    expiryNotice.setAttribute("aria-live", "polite");
+    panel.appendChild(expiryNotice);
+
+    const updateExpiry = () => {
+      const remaining = expiry - Date.now();
+      if (remaining <= 0) {
+        clearInterval(pixExpiryInterval);
+        pixExpiryInterval = null;
+        expiryNotice.textContent = "Este PIX expirou. Verificando o status para liberar uma nova cobrança…";
+        recoverPendingPayment();
+        return;
+      }
+      const minutes = Math.floor(remaining / 60000);
+      const seconds = Math.floor((remaining % 60000) / 1000);
+      expiryNotice.textContent = `Este código PIX expira em ${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}. Gere outro após a confirmação da expiração.`;
+    };
+
+    updateExpiry();
+    if (expiry > Date.now()) pixExpiryInterval = setInterval(updateExpiry, 1000);
+  }
+
   const verify = document.createElement("button");
   verify.type = "button";
   verify.className = "button button-secondary";
@@ -424,7 +458,7 @@ donationForm.addEventListener("submit", async (event) => {
     unresolvedPayment = false;
     paymentReady = true;
     if (data.external_id) localStorage.setItem(PENDING_PAYMENT_KEY, data.external_id);
-    renderPayment(data, amount);
+    renderPayment(data, amount, data.expires_at);
     generatePixButton.disabled = true;
     generatePixButton.textContent = "PIX já gerado";
   } catch {
